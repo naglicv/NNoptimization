@@ -18,10 +18,17 @@ import random
 sys.displayhook = pprint.pprint
 
 LEARNING_RATE = 0.01
+# IRIS dataset
 MAX_LAYERS = 10
-MAX_LAYER_SIZE = 512
-INPUT_LAYER_SIZE = 28 * 28
-OUTPUT_LAYER_SIZE = 10
+MAX_LAYER_SIZE = 24
+INPUT_LAYER_SIZE = 4
+OUTPUT_LAYER_SIZE = 3
+
+# # MNIST dataset
+# MAX_LAYERS = 10
+# MAX_LAYER_SIZE = 512
+# INPUT_LAYER_SIZE = 28 * 28
+# OUTPUT_LAYER_SIZE = 10
 
 ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh'}
 ACTIVATIONS_OUTPUT = {1: 'softmax'}
