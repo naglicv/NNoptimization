@@ -1,5 +1,3 @@
-from operator import call
-from statistics import mean
 import sys
 import time
 import matplotlib.pyplot as plt
@@ -12,18 +10,37 @@ from tensorflow.keras.datasets import mnist
 from tensorflow.keras.utils import to_categorical
 from nn2 import *
 
-fitness_history = []
-gen_num = 0
 example = '2'
 test_size = 0.3
+min_delta = 0.01  # Minimum change in fitness to qualify as an improvement
+patience = 10  # Number of generations to wait before stopping if there is no improvement
 
+fitness_history_best = fitness_history_worst = fitness_history_avg = []
+best_fitness = -np.inf
+patience_counter = 0
 
 def callback_generation(ga_instance):
-    global fitness_history
-    # Append the best fitness score of the current generation to fitness_history
-    best_solution, best_fitness, _ = ga_instance.best_solution()
-    fitness_history.append(best_fitness)
-                           
+    global fitness_history_best, fitness_history_worst, fitness_history_avg, best_fitness, patience_counter, min_delta, patience
+    
+    # Save the fitness score for the best, the worst, and the average solution in each generation
+    best_solution, best_fitness_current, _ = ga_instance.best_solution()
+    worst_solution, worst_fitness, _ = ga_instance.worst_solution()
+    avg_fitness = ga_instance.average_fitness()
+    
+    fitness_history_best.append(best_fitness_current)
+    fitness_history_worst.append(worst_fitness)
+    fitness_history_avg.append(avg_fitness)
+
+    # Early stopping logic
+    if best_fitness_current - best_fitness > min_delta:
+        patience_counter = 0
+        best_fitness = best_fitness_current
+    else:
+        patience_counter += 1
+
+    if patience_counter >= patience:
+        ga_instance.stop()
+        
 def generatePopulation(sol_per_pop):
     population = np.array([])
     for _ in range(sol_per_pop):
@@ -71,9 +88,6 @@ def fitness_func(ga_instance, solution, solution_idx):
     # Create a neural network from the solution array
     solution_nn = array_to_nn(solution)
     
-    # Start timer
-    start_time = time.time()
-    
     # Train the neural network
     history = solution_nn.model.fit(X_train, y_train, 
                                     epochs=int(solution_nn.epochs), 
@@ -82,16 +96,10 @@ def fitness_func(ga_instance, solution, solution_idx):
                                     validation_data=(X_test, y_test),
                                     callbacks=[solution_nn.early_stopping])
     
-    # End timer
-    training_time = time.time() - start_time
-    
     # Get the validation accuracy and loss
+    validation_loss = history.history['val_loss'][-1]
     if problem_type == "classification":
         validation_accuracy = history.history['val_accuracy'][-1]
-        validation_loss = history.history['val_loss'][-1]
-    elif problem_type == "regression":
-        validation_loss = history.history['val_loss'][-1]
-        mean_squared_error = history.history['val_mean_squared_error'][-1]
     
     # Calculate the number of layers and total number of neurons
     num_layers = solution_nn.num_layers
@@ -103,27 +111,25 @@ def fitness_func(ga_instance, solution, solution_idx):
     
     layer_mult = 0.1
     neuron_mult = 0.01
-    time_mult = 0.01
+    penalty_mult = 1 # try different values
     
     # Calculate the penalty based on relative complexity
     penalty = relative_layers * layer_mult + relative_neurons * neuron_mult
-    time_penalty = time_mult * (training_time / 100)
     
     # Calculate the fitness score
-    fitness_score = 1 / (validation_loss + penalty + time_penalty)
+    fitness_score = 1 / (validation_loss + penalty_mult * penalty)
     
     print("individual:\n", solution)
     
     if problem_type == "classification":
         print(f"—> validation accuracy: {validation_accuracy}")
     print(f"—> validation loss: {validation_loss}")
-    print(f"—> training time: {training_time}s")
-    print(f"—> fitness score = 1 / (validation_loss + penalty + time penalty) = 1 / ({validation_loss} + {penalty} + {time_penalty}) = {fitness_score}\n")
+    print(f"—> fitness score = 1 / (validation_loss + penalty_mult * penalty) = 1 / ({validation_loss} + {penalty_mult} * {penalty}) = {fitness_score}\n")
     
     return fitness_score
 
 def custom_crossover(parents, offspring_size, ga_instance):
-    print("—————————————————————> CROSSOVER")
+    # print("—————————————————————> CROSSOVER")
     # print("—> offspring size: ", offspring_size[0])
     
     offspring = np.array([])
@@ -167,7 +173,7 @@ def structured_crossover(parent1, parent2):
     ## CROSSOVER ##
     cross_option = np.random.randint(1, 3)
     cross_option = 2
-    print(f"——> crossover option: {cross_option}\n")
+    # print(f"——> crossover option: {cross_option}\n")
     # print(f"—> parent 1:\n{parent1}")
     # print(f"—> parent 2:\n{parent2}\n")
     
@@ -197,10 +203,10 @@ def structured_crossover(parent1, parent2):
         connection_dropout = np.random.uniform(0.1, 0.5, (2,))
         connection_batch_norm = np.random.choice([0, 1], (2,))
         
-        print(f"——> parent 1:")
-        print(f"    —> point 1: {parent1_point1}, point 2: {parent1_point2}")
-        print(f"——> parent 2:")
-        print(f"    —> point 1: {parent2_point1}, point 2: {parent2_point2}")
+        # print(f"——> parent 1:")
+        # print(f"    —> point 1: {parent1_point1}, point 2: {parent1_point2}")
+        # print(f"——> parent 2:")
+        # print(f"    —> point 1: {parent2_point1}, point 2: {parent2_point2}")
         
         # Perform crossover
         new_learning_rate1 = float(np.random.choice([learning_rate1, learning_rate2]))
@@ -388,20 +394,20 @@ def structured_crossover(parent1, parent2):
             else:
                 offspring2 = offspring
 
-    print(f"\n———> OFFSPRING:")
-    print(f"—> offspring 1:\n{offspring1}\n")
-    print(f"—> offspring 2:\n{offspring2}")
+    # print(f"\n———> OFFSPRING:")
+    # print(f"—> offspring 1:\n{offspring1}\n")
+    # print(f"—> offspring 2:\n{offspring2}")
     return offspring1, offspring2
 
 def custom_mutation(offspring, ga_instance):
-    print("—————————————————————> MUTATION\n")
+    # print("—————————————————————> MUTATION\n")
     for i in range(len(offspring)):
         offspring[i] = structured_mutation(offspring[i])
     return np.array(offspring)
 
 def structured_mutation(individual):
     mutation_probability = 0.02
-    print(f"——> INDIVIDUAL:\n{individual}\n")
+    # print(f"——> INDIVIDUAL:\n{individual}\n")
     
     # Parameters of individual
     learning_rate = float(individual[0])
@@ -513,15 +519,6 @@ def structured_mutation(individual):
     # print(f"——> after mutation:\n{individual}\n")
 
     return individual
-
-# def update_plot(num, fitness_history, line):
-#     """
-#     Update function for FuncAnimation. Updates the plot with new data at each frame.
-#     """
-#     line.set_data(range(len(fitness_history[:num+1])), fitness_history[:num+1])
-#     gen_num += 1
-#     print(f"—————————————————————— GENERATION {gen_num} ————————————————————————")
-#     return line,
     
 def geneticAlgorithm():
     sol_per_pop = 15
@@ -569,7 +566,7 @@ if __name__ == '__main__':
     # ——————————— CLASSIFICATION DATASETS ———————————
     if dataset == 'iris':
         # Load the Iris dataset
-        iris = datasets.load_iris()
+        iris = load_iris()
         X = iris.data
         y = iris.target
 

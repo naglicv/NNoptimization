@@ -1,17 +1,11 @@
-from operator import le
-from tkinter.tix import MAX
-import numpy as np
-from sklearn import datasets
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Activation
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
-from keras.models import Model
-from keras.layers import Input
-import pprint
 import sys
+import pprint
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Input, Dense, BatchNormalization, Dropout, Activation
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.optimizers import Adam
 
 sys.displayhook = pprint.pprint
 
