@@ -1,5 +1,7 @@
+from re import T
 import sys
 import time
+from matplotlib.pylab import rand
 import matplotlib.pyplot as plt
 import numpy as np
 import pygad
@@ -10,26 +12,28 @@ from tensorflow.keras.datasets import mnist
 from tensorflow.keras.utils import to_categorical
 from nn2 import *
 
-example = '2'
+
 test_size = 0.3
 min_delta = 0.01  # Minimum change in fitness to qualify as an improvement
-patience = 10  # Number of generations to wait before stopping if there is no improvement
+patience_ga = 10  # Number of generations to wait before stopping if there is no improvement
+penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
+penalty_mult = -1
 
 fitness_history_best = fitness_history_worst = fitness_history_avg = []
 best_fitness = -np.inf
 patience_counter = 0
+generation_counter = 1
+
+gen_num_printed = True
 
 def callback_generation(ga_instance):
-    global fitness_history_best, fitness_history_worst, fitness_history_avg, best_fitness, patience_counter, min_delta, patience
+    global fitness_history_best, best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed
     
+    gen_num_printed = False
+        
     # Save the fitness score for the best, the worst, and the average solution in each generation
     best_solution, best_fitness_current, _ = ga_instance.best_solution()
-    worst_solution, worst_fitness, _ = ga_instance.worst_solution()
-    avg_fitness = ga_instance.average_fitness()
-    
     fitness_history_best.append(best_fitness_current)
-    fitness_history_worst.append(worst_fitness)
-    fitness_history_avg.append(avg_fitness)
 
     # Early stopping logic
     if best_fitness_current - best_fitness > min_delta:
@@ -38,8 +42,9 @@ def callback_generation(ga_instance):
     else:
         patience_counter += 1
 
-    if patience_counter >= patience:
-        ga_instance.stop()
+    if patience_counter >= patience_ga:
+        print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
+        return "stop"
         
 def generatePopulation(sol_per_pop):
     population = np.array([])
@@ -81,10 +86,13 @@ def generatePopulation(sol_per_pop):
             # Concatenate solution as a new row to the existing population
             population = np.vstack((population, solution))
         
-    print("————————————————————> POPULATION: ", population)
+    # print("————————————————————> POPULATION: ", population)
+    print("\n——————————— GENERATION 0 ———————————\n")
     return population
 
 def fitness_func(ga_instance, solution, solution_idx):
+    global gen_num_printed
+    
     # Create a neural network from the solution array
     solution_nn = array_to_nn(solution)
     
@@ -111,13 +119,16 @@ def fitness_func(ga_instance, solution, solution_idx):
     
     layer_mult = 0.1
     neuron_mult = 0.01
-    penalty_mult = 1 # try different values
     
     # Calculate the penalty based on relative complexity
     penalty = relative_layers * layer_mult + relative_neurons * neuron_mult
     
     # Calculate the fitness score
     fitness_score = 1 / (validation_loss + penalty_mult * penalty)
+    if not gen_num_printed:
+        print(f"——————————— GENERATION {ga_instance.generations_completed + 1} ———————————\n")
+        print("population:\n", ga_instance.population)
+        gen_num_printed = True
     
     print("individual:\n", solution)
     
@@ -129,12 +140,12 @@ def fitness_func(ga_instance, solution, solution_idx):
     return fitness_score
 
 def custom_crossover(parents, offspring_size, ga_instance):
-    # print("—————————————————————> CROSSOVER")
+    print("... Crossover ...")
     # print("—> offspring size: ", offspring_size[0])
     
     offspring = np.array([])
     for i in range(offspring_size[0]):
-        print(f"\n{i}:\n")
+        # print(f"\n{i}:\n")
         parent1_idx = np.random.randint(0, len(parents))
         parent2_idx = np.random.randint(0, len(parents))
         parent1 = parents[parent1_idx]
@@ -400,6 +411,7 @@ def structured_crossover(parent1, parent2):
     return offspring1, offspring2
 
 def custom_mutation(offspring, ga_instance):
+    print("... Mutation ...")
     # print("—————————————————————> MUTATION\n")
     for i in range(len(offspring)):
         offspring[i] = structured_mutation(offspring[i])
@@ -506,7 +518,7 @@ def structured_mutation(individual):
         while batch_norm_old == batch_norms[mutation_point]:
             batch_norms[mutation_point] = float(np.random.choice([0, 1]))
         # print(f"——> mutated batch normalization setting at index {mutation_point}: {batch_norms[mutation_point]}")
-    
+            
     # Pad each part to MAX_LAYERS length
     num_layers_pad = MAX_LAYERS - num_layers
         
@@ -522,7 +534,7 @@ def structured_mutation(individual):
     
 def geneticAlgorithm():
     sol_per_pop = 15
-    num_generations = 50
+    num_generations = 100
     num_parents_mating = 7
     K_tournaments = 5
     keep_parents = -1
@@ -559,9 +571,7 @@ def geneticAlgorithm():
     return ga_instance
 
 if __name__ == '__main__':
-    sys.stdout = open(f'../logs/{problem_type}/{dataset}/{example}.txt', 'w')
     np.set_printoptions(suppress=True, precision=2)
-    start = time.time()
     
     # ——————————— CLASSIFICATION DATASETS ———————————
     if dataset == 'iris':
@@ -613,49 +623,59 @@ if __name__ == '__main__':
 
         # Split the dataset into a training set and a test set
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    
+    
+    for i, penalty_mult in enumerate(penalty_mult_list):
+        sys.stdout = open(f'./logs/{problem_type}/{dataset}/{i+1}.txt', 'w')
+        print(f"Dataset: {dataset}")
+        print(f"Number of training samples: {X_train.shape[0]}")
+        print(f"Number of test samples: {X_test.shape[0]}\n")
         
-    print(f"Dataset: {dataset}")
-    print(f"Number of training samples: {X_train.shape[0]}")
-    print(f"Number of test samples: {X_test.shape[0]}\n")
-    
-    filename = 'genetic'
-    ga_instance = geneticAlgorithm()
-    ga_instance.save(filename=filename)
-    
-    # Convert end time to hours, minutes, and seconds
-    end = time.time() - start
-    hours, rem = divmod(end, 3600)
-    minutes, seconds = divmod(rem, 60)
+        start = time.time()
+        ga_instance = geneticAlgorithm()
+        
+        filename = f'genetic{i}'
+        ga_instance.save(filename=filename)
+        
+        # Convert end time to hours, minutes, and seconds
+        end = time.time() - start
+        hours, rem = divmod(end, 3600)
+        minutes, seconds = divmod(rem, 60)
 
-    solution, solution_fitness, solution_idx = ga_instance.best_solution()
-    best_solution = solution
-    
-    nn2 = array_to_nn(best_solution)
+        solution, solution_fitness, solution_idx = ga_instance.best_solution()
+        best_solution = solution
+        
+        nn2 = array_to_nn(best_solution)
 
-    # Training and evaluating nn2 on dataset
-    nn2.model.fit(X_train, y_train, epochs=nn2.epochs, batch_size=nn2.batch_size)
+        # Training and evaluating nn2 on dataset
+        nn2.model.fit(X_train, y_train, 
+                        epochs=int(nn2.epochs), 
+                        batch_size=int(nn2.batch_size), 
+                        verbose=0, 
+                        validation_data=(X_test, y_test),
+                        callbacks=[nn2.early_stopping])
 
-    # Summary of the model
-    nn2.model.summary()
-    
-    # Evaluate the model on the training data
-    train_loss, train_accuracy = nn2.model.evaluate(X_train, y_train)
-    print('—> Training accuracy:', train_accuracy)
+        # Summary of the model
+        nn2.model.summary()
+        
+        # Evaluate the model on the training data
+        train_loss, train_accuracy = nn2.model.evaluate(X_train, y_train)
+        print('—> Training accuracy:', train_accuracy)
 
-    # Evaluate the model on the test data
-    test_loss, test_accuracy = nn2.model.evaluate(X_test, y_test)
-    print('—> Test accuracy:', test_accuracy)
-    
-    # ga_instance.plot_fitness()
+        # Evaluate the model on the test data
+        test_loss, test_accuracy = nn2.model.evaluate(X_test, y_test)
+        print('—> Test accuracy:', test_accuracy)
+        
+        # ga_instance.plot_fitness()
 
-    print(f"Parameters of the best solution : {solution}")
-    print(f"Fitness value of the best solution = {solution_fitness}")
-    print(f"Index of the best solution : {solution_idx}")
-    print(f"Validation accuracy of the best solution = {test_accuracy}")
-    print(f"Validation loss of the best solution = {test_loss}")
-    print(f"Elapsed time: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
-    
-    plt.figure()
-    plt.plot(ga_instance.best_solutions_fitness)
-    plt.savefig(f"../logs/{problem_type}/{dataset}/plots/{example}.jpg")
-    plt.show(block=False)
+        print(f"Parameters of the best solution : {solution}")
+        print(f"Fitness value of the best solution = {solution_fitness}")
+        print(f"Index of the best solution : {solution_idx}")
+        print(f"Validation accuracy of the best solution = {test_accuracy}")
+        print(f"Validation loss of the best solution = {test_loss}")
+        print(f"Elapsed time: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
+        
+        plt.figure()
+        plt.plot(fitness_history_best)
+        plt.savefig(f"./logs/{problem_type}/{dataset}/plots/{i+1}.jpg")
+        plt.show(block=False)
