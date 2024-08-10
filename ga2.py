@@ -19,7 +19,8 @@ patience_ga = 10  # Number of generations to wait before stopping if there is no
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
 penalty_mult = -1
 
-fitness_history_best = fitness_history_worst = fitness_history_avg = []
+fitness_history_best = []
+fitness_history_avg = []
 best_fitness = -np.inf
 patience_counter = 0
 generation_counter = 1
@@ -27,13 +28,14 @@ generation_counter = 1
 gen_num_printed = True
 
 def callback_generation(ga_instance):
-    global fitness_history_best, best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed
+    global best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed
     
     gen_num_printed = False
         
     # Save the fitness score for the best, the worst, and the average solution in each generation
     best_solution, best_fitness_current, _ = ga_instance.best_solution()
     fitness_history_best.append(best_fitness_current)
+    fitness_history_avg.append(np.mean(ga_instance.last_generation_fitness))
 
     # Early stopping logic
     if best_fitness_current - best_fitness > min_delta:
@@ -281,7 +283,6 @@ def structured_crossover(parent1, parent2):
         offspring2 = []
         for i in range(2):
             if i == 1:
-                
                 # Parameters of parent 1
                 learning_rate2 = float(parent1[0])
                 batch_size2 = int(parent1[1])
@@ -677,5 +678,10 @@ if __name__ == '__main__':
         
         plt.figure()
         plt.plot(fitness_history_best)
-        plt.savefig(f"./logs/{problem_type}/{dataset}/plots/{i+1}.jpg")
+        plt.savefig(f"./logs/{problem_type}/{dataset}/plots/{i+1}max.jpg")
+        plt.show(block=False)
+
+        plt.figure()
+        plt.plot(fitness_history_best)
+        plt.savefig(f"./logs/{problem_type}/{dataset}/plots/{i+1}avg.jpg")
         plt.show(block=False)
