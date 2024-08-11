@@ -1,0 +1,715 @@
+2024-08-11 19:57:04,336 - After generation 2: RSS=2921.08 MB, VMS=50454.70 MB
+2024-08-11 20:02:46,661 - After generation 3: RSS=3486.29 MB, VMS=50975.09 MB
+2024-08-11 20:04:39,649 - After generation 4: RSS=3952.31 MB, VMS=51548.34 MB
+2024-08-11 20:06:36,539 - index 0 is out of bounds for axis 0 with size 0
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2361, in best_solution
+    best_match_idx = numpy.where(
+IndexError: index 0 is out of bounds for axis 0 with size 0
+2024-08-11 20:06:36,539 - index 0 is out of bounds for axis 0 with size 0
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1982, in run
+    best_solution, best_solution_fitness, best_match_idx = self.best_solution(
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2369, in best_solution
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2361, in best_solution
+    best_match_idx = numpy.where(
+IndexError: index 0 is out of bounds for axis 0 with size 0
+2024-08-11 20:20:11,642 - index 0 is out of bounds for axis 0 with size 0
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2361, in best_solution
+    best_match_idx = numpy.where(
+IndexError: index 0 is out of bounds for axis 0 with size 0
+2024-08-11 20:20:11,643 - index 0 is out of bounds for axis 0 with size 0
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1916, in run
+    best_solution, best_solution_fitness, best_match_idx = self.best_solution(pop_fitness=self.last_generation_fitness)
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2369, in best_solution
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2361, in best_solution
+    best_match_idx = numpy.where(
+IndexError: index 0 is out of bounds for axis 0 with size 0
+2024-08-11 20:24:52,392 - cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 204, in fitness_func
+    penalty = (num_layers / MAX_LAYERS) * 0.1 + (total_neurons / (MAX_LAYERS * MAX_LAYER_SIZE)) * 0.01
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+2024-08-11 20:24:52,392 - cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 204, in fitness_func
+    penalty = (num_layers / MAX_LAYERS) * 0.1 + (total_neurons / (MAX_LAYERS * MAX_LAYER_SIZE)) * 0.01
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+2024-08-11 20:30:40,547 - The fitness function should return a number or an iterable (list, tuple, or numpy.ndarray) but the value 0.1371469795703888 of type <class 'tensorflow.python.framework.ops.EagerTensor'> found.
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1718, in cal_pop_fitness
+    raise ValueError(f"The fitness function should return a number or an iterable (list, tuple, or numpy.ndarray) but the value {fitness} of type {type(fitness)} found.")
+ValueError: The fitness function should return a number or an iterable (list, tuple, or numpy.ndarray) but the value 0.1371469795703888 of type <class 'tensorflow.python.framework.ops.EagerTensor'> found.
+2024-08-11 20:30:40,547 - The fitness function should return a number or an iterable (list, tuple, or numpy.ndarray) but the value 0.1371469795703888 of type <class 'tensorflow.python.framework.ops.EagerTensor'> found.
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1718, in cal_pop_fitness
+    raise ValueError(f"The fitness function should return a number or an iterable (list, tuple, or numpy.ndarray) but the value {fitness} of type {type(fitness)} found.")
+ValueError: The fitness function should return a number or an iterable (list, tuple, or numpy.ndarray) but the value 0.1371469795703888 of type <class 'tensorflow.python.framework.ops.EagerTensor'> found.
+2024-08-11 20:34:46,751 - index 0 is out of bounds for axis 0 with size 0
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2361, in best_solution
+    best_match_idx = numpy.where(
+IndexError: index 0 is out of bounds for axis 0 with size 0
+2024-08-11 20:34:46,752 - index 0 is out of bounds for axis 0 with size 0
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1916, in run
+    best_solution, best_solution_fitness, best_match_idx = self.best_solution(pop_fitness=self.last_generation_fitness)
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2369, in best_solution
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 2361, in best_solution
+    best_match_idx = numpy.where(
+IndexError: index 0 is out of bounds for axis 0 with size 0
+2024-08-11 20:40:58,837 - cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 204, in fitness_func
+    penalty = (num_layers / MAX_LAYERS) * 0.1 + (total_neurons / (MAX_LAYERS * MAX_LAYER_SIZE)) * 0.01
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+2024-08-11 20:40:58,837 - cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 204, in fitness_func
+    penalty = (num_layers / MAX_LAYERS) * 0.1 + (total_neurons / (MAX_LAYERS * MAX_LAYER_SIZE)) * 0.01
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute AddV2 as input #1(zero-based) was expected to be a float tensor but is a double tensor [Op:AddV2] name: 
+2024-08-11 20:47:59,780 - Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 88), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 188, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 84, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+tensorflow.python.framework.errors_impl.OperatorNotAllowedInGraphError: Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 88), dtype=float16)
+  • training=True
+2024-08-11 20:47:59,781 - Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 88), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 188, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 84, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+tensorflow.python.framework.errors_impl.OperatorNotAllowedInGraphError: Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 88), dtype=float16)
+  • training=True
+2024-08-11 20:49:34,444 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 133, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_fileb3m9z3vy.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+
+2024-08-11 20:49:34,445 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 133, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_fileb3m9z3vy.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+
+2024-08-11 20:50:29,374 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 133, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_file9m_p6nyi.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+
+2024-08-11 20:50:29,374 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 133, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_file9m_p6nyi.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 76, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' must be defined before the loop
+    Note: AutoGraph tried to define it automatically, but ran into a ValueError: Argument `name` must be a string and cannot contain character `/`. Received: name=hidden_Tensor("cond/add:0", shape=(), dtype=int32) (of type <class 'str'>)
+
+2024-08-11 20:51:24,812 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' is not allowed to be None before the loop
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_filef2sjj672.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' is not allowed to be None before the loop
+
+2024-08-11 20:51:24,812 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' is not allowed to be None before the loop
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_filef2sjj672.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+
+    ValueError: 'hidden_layer' is not allowed to be None before the loop
+
+2024-08-11 20:52:47,518 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+    File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/backend/common/keras_tensor.py", line 91, in __tf_tensor__
+        raise ValueError(
+
+    ValueError: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.operations`). You are likely doing something like:
+    
+    ```
+    x = Input(...)
+    ...
+    tf_fn(x)  # Invalid.
+    ```
+    
+    What you should do instead is wrap `tf_fn` in a layer:
+    
+    ```
+    class MyLayer(Layer):
+        def call(self, x):
+            return tf_fn(x)
+    
+    x = MyLayer()(x)
+    ```
+    
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_filecpi0t5mg.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/backend/common/keras_tensor.py", line 91, in __tf_tensor__
+    raise ValueError(
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+    File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/backend/common/keras_tensor.py", line 91, in __tf_tensor__
+        raise ValueError(
+
+    ValueError: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.operations`). You are likely doing something like:
+    
+    ```
+    x = Input(...)
+    ...
+    tf_fn(x)  # Invalid.
+    ```
+    
+    What you should do instead is wrap `tf_fn` in a layer:
+    
+    ```
+    class MyLayer(Layer):
+        def call(self, x):
+            return tf_fn(x)
+    
+    x = MyLayer()(x)
+    ```
+    
+
+2024-08-11 20:52:47,519 - in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+    File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/backend/common/keras_tensor.py", line 91, in __tf_tensor__
+        raise ValueError(
+
+    ValueError: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.operations`). You are likely doing something like:
+    
+    ```
+    x = Input(...)
+    ...
+    tf_fn(x)  # Invalid.
+    ```
+    
+    What you should do instead is wrap `tf_fn` in a layer:
+    
+    ```
+    class MyLayer(Layer):
+        def call(self, x):
+            return tf_fn(x)
+    
+    x = MyLayer()(x)
+    ```
+    
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/tmp/__autograph_generated_filecpi0t5mg.py", line 73, in tf__create_model
+    ag__.for_stmt(ag__.converted_call(ag__.ld(range), (0, ag__.ld(self).num_layers), None, fscope), None, loop_body, get_state_3, set_state_3, ('hidden_layer',), {'iterate_names': 'i'})
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/backend/common/keras_tensor.py", line 91, in __tf_tensor__
+    raise ValueError(
+ValueError: in user code:
+
+    File "/home/bobi/vita/NNoptimization/nn2.py", line 78, in create_model  *
+        for i in range(0, self.num_layers):
+    File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/backend/common/keras_tensor.py", line 91, in __tf_tensor__
+        raise ValueError(
+
+    ValueError: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.operations`). You are likely doing something like:
+    
+    ```
+    x = Input(...)
+    ...
+    tf_fn(x)  # Invalid.
+    ```
+    
+    What you should do instead is wrap `tf_fn` in a layer:
+    
+    ```
+    class MyLayer(Layer):
+        def call(self, x):
+            return tf_fn(x)
+    
+    x = MyLayer()(x)
+    ```
+    
+
+2024-08-11 20:54:21,399 - Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 76), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 188, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 84, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+tensorflow.python.framework.errors_impl.OperatorNotAllowedInGraphError: Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 76), dtype=float16)
+  • training=True
+2024-08-11 20:54:21,400 - Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 76), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 188, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 84, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+tensorflow.python.framework.errors_impl.OperatorNotAllowedInGraphError: Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(None, 76), dtype=float16)
+  • training=True
+2024-08-11 20:59:49,842 - cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 86, in create_model
+    if tf.reduce_any(self.batch_norms[i]):
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+2024-08-11 20:59:49,842 - cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 86, in create_model
+    if tf.reduce_any(self.batch_norms[i]):
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+2024-08-11 22:02:52,649 - cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 86, in create_model
+    if tf.reduce_any(self.batch_norms[i]):
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+2024-08-11 22:02:52,649 - cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 185, in fitness_func
+    solution_nn = array_to_nn(solution_tensor)
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 135, in array_to_nn
+    nn = NeuralNetwork(
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 68, in __init__
+    self.create_model()
+  File "/home/bobi/vita/NNoptimization/nn2.py", line 86, in create_model
+    if tf.reduce_any(self.batch_norms[i]):
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/util/traceback_utils.py", line 153, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/tensorflow/python/framework/ops.py", line 5983, in raise_from_not_ok_status
+    raise core._status_to_exception(e) from None  # pylint: disable=protected-access
+tensorflow.python.framework.errors_impl.InvalidArgumentError: cannot compute Any as input #0(zero-based) was expected to be a bool tensor but is a int32 tensor [Op:Any] name: 
+2024-08-11 22:06:17,035 - Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(70, 92), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 188, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 84, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+tensorflow.python.framework.errors_impl.OperatorNotAllowedInGraphError: Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(70, 92), dtype=float16)
+  • training=True
+2024-08-11 22:06:17,035 - Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(70, 92), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 188, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 84, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+tensorflow.python.framework.errors_impl.OperatorNotAllowedInGraphError: Exception encountered when calling Dropout.call().
+
+[1mUsing a symbolic `tf.Tensor` as a Python `bool` is not allowed. You can attempt the following resolutions to the problem: If you are running in Graph mode, use Eager execution mode or decorate this function with @tf.function. If you are using AutoGraph, you can try decorating this function with @tf.function. If that does not work, then you may be using an unsupported feature or your source code may not be visible to AutoGraph. See https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code for more information.[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(70, 92), dtype=float16)
+  • training=True
+2024-08-11 22:08:47,436 - Exception encountered when calling Dropout.call().
+
+[1m`x.dtype` must be compatible with `rate.dtype`. Received: x.dtype=<dtype: 'float16'> and rate.dtype=<dtype: 'float32'>[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(33, 110), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 189, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 85, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+ValueError: Exception encountered when calling Dropout.call().
+
+[1m`x.dtype` must be compatible with `rate.dtype`. Received: x.dtype=<dtype: 'float16'> and rate.dtype=<dtype: 'float32'>[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(33, 110), dtype=float16)
+  • training=True
+2024-08-11 22:08:47,436 - Exception encountered when calling Dropout.call().
+
+[1m`x.dtype` must be compatible with `rate.dtype`. Received: x.dtype=<dtype: 'float16'> and rate.dtype=<dtype: 'float32'>[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(33, 110), dtype=float16)
+  • training=True
+Traceback (most recent call last):
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1914, in run
+    self.last_generation_fitness = self.cal_pop_fitness()
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1871, in cal_pop_fitness
+    raise ex
+  File "/home/bobi/.local/lib/python3.10/site-packages/pygad/pygad.py", line 1708, in cal_pop_fitness
+    fitness = self.fitness_func(self, sol, sol_idx)
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 189, in fitness_func
+    validation_loss = train_and_get_val_loss(
+  File "/home/bobi/vita/NNoptimization/ga3.py", line 85, in train_and_get_val_loss
+    history = model.fit(X_train, y_train,
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/home/bobi/.local/lib/python3.10/site-packages/keras/src/utils/traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+ValueError: Exception encountered when calling Dropout.call().
+
+[1m`x.dtype` must be compatible with `rate.dtype`. Received: x.dtype=<dtype: 'float16'> and rate.dtype=<dtype: 'float32'>[0m
+
+Arguments received by Dropout.call():
+  • inputs=tf.Tensor(shape=(33, 110), dtype=float16)
+  • training=True
