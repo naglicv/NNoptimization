@@ -35,6 +35,14 @@ generation_counter = 1
 
 gen_num_printed = True
 
+# Ensure the directory exists
+log_dir = f"./logs/{problem_type}/{dataset}"
+os.makedirs(log_dir, exist_ok=True)
+
+# Set up logging
+logging.basicConfig(filename=f"{log_dir}/memory_usage.log", level=logging.INFO, format='%(asctime)s - %(message)s')
+
+
 def log_memory_usage(message="Memory usage"):
     process = psutil.Process()
     memory_info = process.memory_info()
@@ -108,7 +116,7 @@ def callback_generation(ga_instance):
     if patience_counter >= patience_ga:
         print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
         return "stop"
-    print(f"\n—————————— GENERATION {generation_counter} ——————————\n")
+    print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
 def generatePopulation(sol_per_pop):
     population = []
@@ -685,11 +693,12 @@ if __name__ == '__main__':
                         batch_size=int(nn2.batch_size), 
                         validation_data=(X_val, y_val),
                         callbacks=[nn2.early_stopping])
-        tf.keras.backend.clear_session()
 
         test_loss, test_accuracy = nn2.model.evaluate(X_test, y_test)
         validation_loss, validation_accuracy = nn2.model.evaluate(X_val, y_val)
         train_loss, train_accuracy = nn2.model.evaluate(X_train, y_train)
+        
+        tf.keras.backend.clear_session()
 
         # Save the results to a file
         results_content = (
