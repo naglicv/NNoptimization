@@ -3,6 +3,7 @@ import gc
 import pprint
 import numpy as np
 import matplotlib.pyplot as plt
+import tensorflow as tf
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense, BatchNormalization, Dropout, Activation
 from tensorflow.keras.callbacks import EarlyStopping
@@ -11,8 +12,8 @@ from tensorflow.keras.optimizers import Adam
 sys.displayhook = pprint.pprint
 
 # dataset = 'iris'
-# dataset = 'mnist'
-dataset = 'california'
+dataset = 'mnist'
+# dataset = 'california'
 # dataset = 'diabetes'
 
 BEG_PARAMS = ("learning_rate", "batch_size", "epochs", "patience") 
@@ -102,7 +103,12 @@ class NeuralNetwork():
             self.model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mean_squared_error'])
         
         self.early_stopping = EarlyStopping(monitor='val_loss', patience=self.patience, restore_best_weights=True)
+        # Clear the TensorFlow session to free up memory
+        tf.keras.backend.clear_session()
 
+        # Force garbage collection to free up any unused memory
+        gc.collect()
+        
 def array_to_nn(ga_array):
     # print("————————————————————> GA_ARRAY: ", ga_array)
     learning_rate = float(ga_array[0])
@@ -129,6 +135,9 @@ def array_to_nn(ga_array):
                        dropout_rates=dropout_rates,
                        batch_norms=batch_norms.astype(np.int32),
                        activation_output=activation_output)
+    
+    del ga_array
+    gc.collect()
     
     return nn
 
