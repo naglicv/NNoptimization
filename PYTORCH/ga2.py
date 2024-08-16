@@ -777,8 +777,8 @@ if __name__ == '__main__':
         X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset)
 
         for i, penalty_mult in enumerate(penalty_mult_list):
-            if dataset_i == 0 and i == 0:
-                continue
+            # if dataset_i == 0 and i == 0:
+            #     continue
             start = time.time()
             
             # Run the genetic algorithm for this penalty multiplier
