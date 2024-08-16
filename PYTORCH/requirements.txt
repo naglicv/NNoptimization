@@ -1,0 +1,8 @@
+matplotlib
+numpy
+psutil
+pygad
+tqdm
+pandas
+torch
+scikit-learn
