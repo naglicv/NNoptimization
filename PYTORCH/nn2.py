@@ -73,8 +73,6 @@ class NeuralNetwork(nn.Module):
             self.output_activation = nn.Tanh()
         elif activation_output == 'linear':
             self.output_activation = nn.Identity()
-        elif activation_output == 'relu':
-            self.output_activation = nn.ReLU()
 
         # Define the optimizer
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -200,112 +198,112 @@ def load_and_define_parameters(dataset):
     dataset_parameters = {
         'iris': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 24,
             'INPUT_LAYER_SIZE': 4,
             'OUTPUT_LAYER_SIZE': 3
         },
         'mnist': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 512,
             'INPUT_LAYER_SIZE': 784,
             'OUTPUT_LAYER_SIZE': 10
         },
         'adult': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 128,
             'INPUT_LAYER_SIZE': 108,
             'OUTPUT_LAYER_SIZE': 2
         },
         'wine': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 24,
             'INPUT_LAYER_SIZE': 13,
             'OUTPUT_LAYER_SIZE': 3
         },
         'breast_cancer': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 33,
             'OUTPUT_LAYER_SIZE': 2
         },
         'heart_disease': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 13,
             'OUTPUT_LAYER_SIZE': 2
         },
         'thyroid_disease': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 64,
             'INPUT_LAYER_SIZE': 54,
             'OUTPUT_LAYER_SIZE': 3
         },
         'census_income': {
             'problem_type': "classification",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 256,
             'INPUT_LAYER_SIZE': 509,
             'OUTPUT_LAYER_SIZE': 2
         },
         'california': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 64,
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
         },
         'diabetes': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 10,
             'OUTPUT_LAYER_SIZE': 1
         },
         'auto_mpg': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 7,
             'OUTPUT_LAYER_SIZE': 1
         },
         'concrete': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
         },
         'abalone': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
         },
         'housing': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 13,
             'OUTPUT_LAYER_SIZE': 1
         },
         'energy_efficiency': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
         },
         'kin8nm': {
             'problem_type': "regression",
-            'MAX_LAYERS': 50,
+            'MAX_LAYERS': 20,
             'MAX_LAYER_SIZE': 64,
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
@@ -324,11 +322,12 @@ def load_and_define_parameters(dataset):
     OUTPUT_LAYER_SIZE = params['OUTPUT_LAYER_SIZE']
 
     # Define activation functions based on the problem type
-    ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
     if problem_type == "classification":
+        ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
         ACTIVATIONS_OUTPUT = {1: 'softmax', 2: 'sigmoid'}
     elif problem_type == "regression":
-        ACTIVATIONS_OUTPUT = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
+        ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
+        ACTIVATIONS_OUTPUT = {1: 'linear', 2: 'relu', 3: 'sigmoid', 4: 'tanh'}
 
     return problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT
 
