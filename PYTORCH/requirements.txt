@@ -2,7 +2,7 @@ matplotlib
 numpy
 psutil
 pygad
-tqdm
+enlighten
 pandas
 torch==<version>+cu124 -f https://download.pytorch.org/whl/cu124
 torchvision==<version>+cu124 -f https://download.pytorch.org/whl/cu124
