@@ -98,9 +98,10 @@ class NeuralNetwork(nn.Module):
                 self.optimizer.zero_grad()
                 outputs = self(batch_data)
                 
-                # Ensure labels are of type Long for CrossEntropyLoss
                 if problem_type == "classification":
                     batch_labels = batch_labels.long()
+                elif problem_type == "regression":
+                    batch_labels = batch_labels.view_as(outputs)
                 
                 loss = self.criterion(outputs, batch_labels)
                 loss.backward()
@@ -109,7 +110,6 @@ class NeuralNetwork(nn.Module):
 
             if val_loader:
                 val_loss, val_accuracy = self.evaluate(val_loader)
-                # You can print or log the validation loss and accuracy here if needed
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
                     epochs_no_improve = 0
@@ -117,7 +117,7 @@ class NeuralNetwork(nn.Module):
                     epochs_no_improve += 1
 
                 if epochs_no_improve >= self.patience:
-                    print(f"Early stopping at epoch {epoch+1}")
+                    # print(f"Early stopping at epoch {epoch+1}")
                     break
 
     def evaluate(self, data_loader):
@@ -131,18 +131,21 @@ class NeuralNetwork(nn.Module):
                 batch_data, batch_labels = batch_data.to(device), batch_labels.to(device)  # Move data to GPU
                 outputs = self(batch_data)
                 
-                # Ensure labels are of type Long for CrossEntropyLoss
                 if problem_type == "classification":
+                    # Ensure labels are of type Long for CrossEntropyLoss
                     batch_labels = batch_labels.long()
-                
-                loss = self.criterion(outputs, batch_labels)
-                total_loss += loss.item()
-                
-                if problem_type == "classification":
+                    loss = self.criterion(outputs, batch_labels)
+                    total_loss += loss.item()
+                    
                     _, predicted = torch.max(outputs.data, 1)
                     total += batch_labels.size(0)
                     correct += (predicted == batch_labels).sum().item()
-        
+                elif problem_type == "regression":
+                    # Ensure the shapes match for MSELoss
+                    batch_labels = batch_labels.view_as(outputs)
+                    loss = self.criterion(outputs, batch_labels)
+                    total_loss += loss.item()
+
         average_loss = total_loss / len(data_loader)
         accuracy = (correct / total) * 100 if problem_type == "classification" else None
         return average_loss, accuracy

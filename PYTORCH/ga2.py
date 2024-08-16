@@ -718,17 +718,17 @@ def geneticAlgorithm(ga_index):
     # K_tournaments = 2
     # keep_parents = 1
 
-    # sol_per_pop = 50
-    # num_generations = 100
-    # num_parents_mating = 10
-    # K_tournaments = 3
-    # keep_parents = 2
-
-    sol_per_pop = 100
+    sol_per_pop = 50
     num_generations = 100
-    num_parents_mating = 20
-    K_tournaments = 4
+    num_parents_mating = 10
+    K_tournaments = 5
     keep_parents = 3
+
+    # sol_per_pop = 100
+    # num_generations = 100
+    # num_parents_mating = 20
+    # K_tournaments = 4
+    # keep_parents = 3
     
     parent_selection_type = "tournament"
 
@@ -763,7 +763,9 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    for dataset in DATASET_LIST:
+    for dataset_i in range(len(DATASET_LIST)//2):
+        dataset = DATASET_LIST[dataset_i]
+        
         # Load the parameters for the selected dataset
         problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset)
         
@@ -775,6 +777,8 @@ if __name__ == '__main__':
         X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset)
 
         for i, penalty_mult in enumerate(penalty_mult_list):
+            if dataset_i == 0 and i == 0:
+                continue
             start = time.time()
             
             # Run the genetic algorithm for this penalty multiplier
