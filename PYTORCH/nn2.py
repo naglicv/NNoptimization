@@ -316,8 +316,8 @@ def load_and_define_parameters(dataset):
     # Extract the parameters for the dataset
     params = dataset_parameters[dataset]
     problem_type = params['problem_type']
-    MAX_LAYERS = params['MAX_LAYERS']
-    MAX_LAYER_SIZE = params['MAX_LAYER_SIZE']
+    MAX_LAYERS = 20
+    MAX_LAYER_SIZE = 256
     INPUT_LAYER_SIZE = params['INPUT_LAYER_SIZE']
     OUTPUT_LAYER_SIZE = params['OUTPUT_LAYER_SIZE']
 
