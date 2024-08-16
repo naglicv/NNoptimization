@@ -31,7 +31,7 @@ tracemalloc.start()
 
 test_size = 0.3
 min_delta = 0.01  # Minimum change in fitness to qualify as an improvement
-patience_ga = 50  # Number of generations to wait before stopping if there is no improvement
+patience_ga = 30  # Number of generations to wait before stopping if there is no improvement
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
 
 # fitness_scores = {}
@@ -820,7 +820,17 @@ if __name__ == '__main__':
                 f"Validation loss: {validation_loss}\n"
                 f"Test accuracy: {test_accuracy}\n"
                 f"Test loss: {test_loss}\n"
-                f"Parameters of the best solution: {solution}\n"
+                f"Parameters of the best solution:"
+                f"\tLearning rate: {best_solution[0]}\n"
+                f"\tBatch size: {best_solution[1]}\n"
+                f"\tEpochs: {best_solution[2]}\n"
+                f"\tPatience: {best_solution[3]}\n"
+                f"\tNumber of layers: {best_solution[4]}\n"
+                f"\tHidden layer sizes: {best_solution[5:5+MAX_LAYERS]}\n"
+                f"\tActivations: {best_solution[5+MAX_LAYERS:5+2*MAX_LAYERS]}\n"
+                f"\tDropout rates: {best_solution[5+2*MAX_LAYERS:5+3*MAX_LAYERS]}\n"
+                f"\tBatch normalization: {best_solution[5+3*MAX_LAYERS:5+4*MAX_LAYERS]}\n"
+                f"\tOutput activation: {best_solution[-1]}\n"
                 f"Fitness value of the best solution: {solution_fitness}\n"
                 f"Index of the best solution: {solution_idx}\n"
                 f"Elapsed time: {elapsed_time}\n"
