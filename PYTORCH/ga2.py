@@ -759,7 +759,7 @@ if __name__ == '__main__':
     num_datasets = len(DATASET_LIST)//2
     ticks_dataset = manager.counter(total=num_datasets, desc="Datasets", unit="dataset", color="green")
     
-    for dataset_i in range(num_datasets, len(DATASET_LIST)):
+    for dataset_i in range(num_datasets, len(DATASET_LIST)): 
         dataset = DATASET_LIST[dataset_i]
         
         ticks_penalty = manager.counter(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", color="blue")

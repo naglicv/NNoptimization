@@ -4,5 +4,7 @@ psutil
 pygad
 tqdm
 pandas
-torch
+torch==<version>+cu124 -f https://download.pytorch.org/whl/cu124
+torchvision==<version>+cu124 -f https://download.pytorch.org/whl/cu124
+torchaudio==<version>+cu124 -f https://download.pytorch.org/whl/cu124
 scikit-learn
