@@ -73,6 +73,8 @@ class NeuralNetwork(nn.Module):
             self.output_activation = nn.Tanh()
         elif activation_output == 'linear':
             self.output_activation = nn.Identity()
+        elif activation_output == 'relu':
+            self.output_activation = nn.ReLU()
 
         # Define the optimizer
         self.optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -322,12 +324,11 @@ def load_and_define_parameters(dataset):
     OUTPUT_LAYER_SIZE = params['OUTPUT_LAYER_SIZE']
 
     # Define activation functions based on the problem type
+    ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
     if problem_type == "classification":
-        ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
         ACTIVATIONS_OUTPUT = {1: 'softmax', 2: 'sigmoid'}
     elif problem_type == "regression":
-        ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
-        ACTIVATIONS_OUTPUT = {1: 'linear', 2: 'relu', 3: 'sigmoid', 4: 'tanh'}
+        ACTIVATIONS_OUTPUT = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
 
     return problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT
 
