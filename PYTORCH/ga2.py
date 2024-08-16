@@ -8,9 +8,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import psutil
 import pygad
-import tqdm
+from tqdm import tqdm
 import pandas as pd
 import torch
+import enlighten
+
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.datasets import load_iris, fetch_california_housing, load_diabetes, fetch_openml
 from sklearn.model_selection import train_test_split
@@ -26,8 +28,9 @@ else:
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-tracemalloc.start()
+manager = enlighten.get_manager()
 
+# tracemalloc.start()
 
 test_size = 0.3
 min_delta = 0.001  # Minimum change in fitness to qualify as an improvement
@@ -48,19 +51,19 @@ log_dir = f"./logs/{problem_type}/{dataset}"
 os.makedirs(log_dir, exist_ok=True)
 
 # Set up logging
-logging.basicConfig(filename=f"{log_dir}/memory_usage.log", level=logging.INFO, format='%(asctime)s - %(message)s')
+# logging.basicConfig(filename=f"{log_dir}/memory_usage.log", level=logging.INFO, format='%(asctime)s - %(message)s')
 
-def log_memory_usage(message="Memory usage"):
-    process = psutil.Process()
-    memory_info = process.memory_info()
-    logging.info(f"{message}: RSS={memory_info.rss / (1024 ** 2):.2f} MB, VMS={memory_info.vms / (1024 ** 2):.2f} MB")
+# def log_memory_usage(message="Memory usage"):
+#     process = psutil.Process()
+#     memory_info = process.memory_info()
+#     logging.info(f"{message}: RSS={memory_info.rss / (1024 ** 2):.2f} MB, VMS={memory_info.vms / (1024 ** 2):.2f} MB")
     
-    # # Also log the tracemalloc stats
-    # snapshot = tracemalloc.take_snapshot()
-    # top_stats = snapshot.statistics('lineno')
-    # logging.info(f"[ Top 10 memory-consuming lines for {message} ]")
-    # for stat in top_stats[:10]:
-    #     logging.info(stat)
+#     # # Also log the tracemalloc stats
+#     # snapshot = tracemalloc.take_snapshot()
+#     # top_stats = snapshot.statistics('lineno')
+#     # logging.info(f"[ Top 10 memory-consuming lines for {message} ]")
+#     # for stat in top_stats[:10]:
+#     #     logging.info(stat)
         
         
 """
@@ -216,14 +219,16 @@ def callback_generation(ga_instance):
         patience_counter += 1
     
     # Log memory usage after each generation
-    log_memory_usage(f"After generation {ga_instance.generations_completed + 1}")
-    
+    # log_memory_usage(f"After generation {ga_instance.generations_completed + 1}")
     # Early stopping check
     if patience_counter >= patience_ga:
-        print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
+        # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
+        ticks_generation.count = ticks_generation.total
+        ticks_generation.refresh()
         return "stop"
     
-    print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
+    ticks_generation.update()
+    # print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
 def generatePopulation(sol_per_pop):
     population = []
@@ -267,14 +272,14 @@ def generatePopulation(sol_per_pop):
     
     # Convert the list of solutions to a numpy array
     population = np.array(population)
-    print("\n——————————— GENERATION 0 ———————————\n")
+    # print("\n——————————— GENERATION 0 ———————————\n")
     
     return population
 
 
 def fitness_func(ga_instance, solution, solution_idx):
     global gen_num_printed
-    print(".. Fitness function ..")    
+    # print(".. Fitness function ..")    
 
     # Create a neural network from the solution array
     solution_nn = array_to_nn(solution).to(device)
@@ -291,7 +296,7 @@ def fitness_func(ga_instance, solution, solution_idx):
 
     # Check if validation_loss is NaN
     if torch.isnan(torch.tensor(validation_loss)):
-        print("Validation loss is NaN, setting fitness score to a very low value.")
+        # print("Validation loss is NaN, setting fitness score to a very low value.")
         fitness_score = -np.inf
     else:
         # Calculate the number of layers and total number of neurons
@@ -311,13 +316,13 @@ def fitness_func(ga_instance, solution, solution_idx):
         # Calculate the fitness score
         small_value = 1e-8
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
-        print("Fitness score: ", fitness_score)
+        # print("Fitness score: ", fitness_score)
 
     return fitness_score
 
 
 def custom_crossover(parents, offspring_size, ga_instance):
-    print("... Crossover ...")
+    # print("... Crossover ...")
     # print("—> offspring size: ", offspring_size[0])
     
     offspring = np.array([])
@@ -575,7 +580,7 @@ def structured_crossover(parent1, parent2):
 
 
 def custom_mutation(offspring, ga_instance):
-    print("... Mutation ...")
+    # print("... Mutation ...")
     # print("—————————————————————> MUTATION\n")
     for i in range(len(offspring)):
         offspring[i] = structured_mutation(offspring[i])
@@ -698,7 +703,7 @@ def print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_gener
     save_results_to_file(f"{output_dir}/{ga_index+1}_parameters.txt", params_content)
 
 def geneticAlgorithm(ga_index):
-    global parent_selection_type
+    global parent_selection_type, ticks_generation
     # sol_per_pop = 20
     # num_generations = 150
     # num_parents_mating = 3
@@ -719,6 +724,7 @@ def geneticAlgorithm(ga_index):
     
     parent_selection_type = "tournament"
 
+    ticks_generation = manager.counter(total=num_generations, desc="Generations", unit="gen", color="cyan")
     
     # Print the parameters and global variables to the file
     print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_generations, num_parents_mating, K_tournaments, keep_parents)
@@ -739,7 +745,7 @@ def geneticAlgorithm(ga_index):
 
     # Run the genetic algorithm
     ga_instance.run()
-
+    ticks_generation.close()
     # Free memory used by the initial population
     del population
     gc.collect()  # Force garbage collection to free memory
@@ -750,11 +756,17 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    for dataset_i in range(len(DATASET_LIST)//2, len(DATASET_LIST)):
+    num_datasets = len(DATASET_LIST)//2
+    ticks_dataset = manager.counter(total=num_datasets, desc="Datasets", unit="dataset", color="green")
+    
+    for dataset_i in range(num_datasets, len(DATASET_LIST)):
         dataset = DATASET_LIST[dataset_i]
-        print(f"————————————————————————————————————————————————————————————")
-        print(f"dataset: {dataset}, index: {dataset_i}")
-        print(f"————————————————————————————————————————————————————————————")
+        
+        ticks_penalty = manager.counter(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", color="blue")
+        
+        # print(f"————————————————————————————————————————————————————————————")
+        # print(f"dataset: {dataset}, index: {dataset_i}")
+        # print(f"————————————————————————————————————————————————————————————")
         
         # Load the parameters for the selected dataset
         problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset)
@@ -767,9 +779,9 @@ if __name__ == '__main__':
         X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset)
 
         for i, penalty_mult in enumerate(penalty_mult_list):
-            print(f"——————————————————————————————————————————")
-            print(f"penalty_mult: {penalty_mult}")
-            print(f"——————————————————————————————————————————")
+            # print(f"——————————————————————————————————————————")
+            # print(f"penalty_mult: {penalty_mult}")
+            # print(f"——————————————————————————————————————————")
             # if dataset_i == 0 and i == 0:
             #     continue
             start = time.time()
@@ -852,4 +864,9 @@ if __name__ == '__main__':
             
             # Clear the GA instance to free up memory
             del ga_instance
-            torch.cuda.empty_cache()  # Clear GPU memory cache
+            torch.cuda.empty_cache()  # Clear GPU memory cache  
+            
+            ticks_penalty.update()
+        ticks_penalty.close()
+        ticks_dataset.update()
+    ticks_dataset.close()   
