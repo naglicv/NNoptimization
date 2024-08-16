@@ -750,8 +750,11 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    for dataset_i in range(len(DATASET_LIST)//2):
+    for dataset_i in range(len(DATASET_LIST)//2, len(DATASET_LIST)):
         dataset = DATASET_LIST[dataset_i]
+        print(f"————————————————————————————————————————————————————————————")
+        print(f"dataset: {dataset}, index: {dataset_i}")
+        print(f"————————————————————————————————————————————————————————————")
         
         # Load the parameters for the selected dataset
         problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset)
@@ -764,6 +767,9 @@ if __name__ == '__main__':
         X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset)
 
         for i, penalty_mult in enumerate(penalty_mult_list):
+            print(f"——————————————————————————————————————————")
+            print(f"penalty_mult: {penalty_mult}")
+            print(f"——————————————————————————————————————————")
             # if dataset_i == 0 and i == 0:
             #     continue
             start = time.time()
