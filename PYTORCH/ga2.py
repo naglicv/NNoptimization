@@ -12,6 +12,7 @@ from tqdm import tqdm
 import pandas as pd
 import torch
 import enlighten
+import warnings
 
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.datasets import load_iris, fetch_california_housing, load_diabetes, fetch_openml
@@ -29,12 +30,12 @@ else:
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 manager = enlighten.get_manager()
-
+warnings.filterwarnings("ignore")
 # tracemalloc.start()
 
 test_size = 0.3
 min_delta = 0.001  # Minimum change in fitness to qualify as an improvement
-patience_ga = 30  # Number of generations to wait before stopping if there is no improvement
+patience_ga = 50  # Number of generations to wait before stopping if there is no improvement
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
 
 # fitness_scores = {}
@@ -192,6 +193,11 @@ def load_and_preprocess_data(dataset):
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
+    # Convert DataFrame/Series to the correct dtype
+    X_train, y_train = X_train.astype("float32"), y_train.astype("float32")
+    X_val, y_val = X_val.astype("float32"), y_val.astype("float32")
+    X_test, y_test = X_test.astype("float32"), y_test.astype("float32")
+    
     # Convert NumPy arrays to PyTorch tensors
     X_train, y_train = torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.float32)
     X_val, y_val = torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val, dtype=torch.float32)
@@ -711,10 +717,10 @@ def geneticAlgorithm(ga_index):
     # keep_parents = 1
 
     sol_per_pop = 50
-    num_generations = 100
-    num_parents_mating = 10
-    K_tournaments = 5
-    keep_parents = 3
+    num_generations = 300
+    num_parents_mating = 30
+    K_tournaments = 6
+    keep_parents = 5
 
     # sol_per_pop = 100
     # num_generations = 100
@@ -724,7 +730,7 @@ def geneticAlgorithm(ga_index):
     
     parent_selection_type = "tournament"
 
-    ticks_generation = manager.counter(total=num_generations, desc="Generations", unit="gen", color="cyan")
+    ticks_generation = tqdm(total=num_generations, desc="Generations", unit="gen", leave=False, colour="cyan")
     
     # Print the parameters and global variables to the file
     print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_generations, num_parents_mating, K_tournaments, keep_parents)
@@ -757,12 +763,12 @@ def geneticAlgorithm(ga_index):
 
 if __name__ == '__main__':
     num_datasets = len(DATASET_LIST)//2
-    ticks_dataset = manager.counter(total=num_datasets, desc="Datasets", unit="dataset", color="green")
+    ticks_dataset = tqdm(total=num_datasets, desc="Datasets", unit="dataset", colour="green")
     
     for dataset_i in range(num_datasets, len(DATASET_LIST)): 
         dataset = DATASET_LIST[dataset_i]
         
-        ticks_penalty = manager.counter(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", color="blue")
+        ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue")
         
         # print(f"————————————————————————————————————————————————————————————")
         # print(f"dataset: {dataset}, index: {dataset_i}")
