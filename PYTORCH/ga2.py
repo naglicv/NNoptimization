@@ -30,7 +30,7 @@ tracemalloc.start()
 
 
 test_size = 0.3
-min_delta = 0.01  # Minimum change in fitness to qualify as an improvement
+min_delta = 0.001  # Minimum change in fitness to qualify as an improvement
 patience_ga = 30  # Number of generations to wait before stopping if there is no improvement
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
 
@@ -214,19 +214,6 @@ def callback_generation(ga_instance):
         best_fitness = best_fitness_current
     else:
         patience_counter += 1
-
-    # # Create a new dictionary to hold fitness scores for the current generation
-    # current_gen_fitness_scores = {}
-
-    # for idx, individual in enumerate(ga_instance.population):
-    #     # Use tuple(individual) as the key and store the fitness score
-    #     current_gen_fitness_scores[tuple(individual)] = ga_instance.last_generation_fitness[idx]
-
-    # # Update fitness_scores to only contain scores from the last generation and the current one
-    # fitness_scores = {**fitness_scores, **current_gen_fitness_scores}
-
-    # Force garbage collection to manage memory
-    # gc.collect()
     
     # Log memory usage after each generation
     log_memory_usage(f"After generation {ga_instance.generations_completed + 1}")
@@ -763,7 +750,7 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    for dataset_i in range(len(DATASET_LIST)//2, len(DATASET_LIST)):
+    for dataset_i in range(len(DATASET_LIST)//2):
         dataset = DATASET_LIST[dataset_i]
         
         # Load the parameters for the selected dataset
@@ -813,6 +800,9 @@ if __name__ == '__main__':
             test_loss, test_accuracy = nn2.evaluate(test_loader)
             
             # Save the results to a file
+            nl = int(best_solution[4])
+            act = [ACTIVATIONS[int(a)] for a in best_solution[5+MAX_LAYERS:5+MAX_LAYERS+nl]]
+            act_out = ACTIVATIONS_OUTPUT[int(best_solution[-1])]
             results_content = (
                 f"Train accuracy: {train_accuracy}\n"
                 f"Train loss: {train_loss}\n"
@@ -825,12 +815,12 @@ if __name__ == '__main__':
                 f"\tBatch size: {best_solution[1]}\n"
                 f"\tEpochs: {best_solution[2]}\n"
                 f"\tPatience: {best_solution[3]}\n"
-                f"\tNumber of layers: {best_solution[4]}\n"
-                f"\tHidden layer sizes: {best_solution[5:5+MAX_LAYERS]}\n"
-                f"\tActivations: {best_solution[5+MAX_LAYERS:5+2*MAX_LAYERS]}\n"
-                f"\tDropout rates: {best_solution[5+2*MAX_LAYERS:5+3*MAX_LAYERS]}\n"
-                f"\tBatch normalization: {best_solution[5+3*MAX_LAYERS:5+4*MAX_LAYERS]}\n"
-                f"\tOutput activation: {best_solution[-1]}\n"
+                f"\tNumber of layers: {nl}\n"
+                f"\tHidden layer sizes: {best_solution[5:5+nl]}\n"
+                f"\tActivations: {act}\n"
+                f"\tDropout rates: {best_solution[5+2*MAX_LAYERS:5+2*MAX_LAYERS+nl]}\n"
+                f"\tBatch normalization: {best_solution[5+3*MAX_LAYERS:5+3*MAX_LAYERS+nl]}\n"
+                f"\tOutput activation: {act_out}\n"
                 f"Fitness value of the best solution: {solution_fitness}\n"
                 f"Index of the best solution: {solution_idx}\n"
                 f"Elapsed time: {elapsed_time}\n"
