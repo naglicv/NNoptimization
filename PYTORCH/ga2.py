@@ -763,7 +763,7 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    for dataset_i in range(len(DATASET_LIST)//2):
+    for dataset_i in range(len(DATASET_LIST)//2, len(DATASET_LIST)):
         dataset = DATASET_LIST[dataset_i]
         
         # Load the parameters for the selected dataset
