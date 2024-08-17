@@ -30,7 +30,7 @@ DATASET_LIST_REG = {
     'parkinsons_telemonitoring': 189,  # Medium, 26 features (time series data)
     'air_quality': 360,             # Medium, 15 features (time series data)
     'bike_sharing': 275,            # Medium, 16 features (mixed)
-    'individual_household_electric_power_consumption': 235,  # Large, 7 features (time series data)
+    'infrared_thermography_temperature': 925,  # Large, 7 features (time series data)
 }
 
 DATASET_LIST_SMALL = {
@@ -49,11 +49,11 @@ DATASET_LIST_LARGE = {
     # Regression Datasets
     'bank_marketing': 222,          # Medium, 16 features (mixed)
     'parkinsons_telemonitoring': 189,  # Medium, 26 features (time series data)
-    'air_quality': 360,             # Medium, 15 features (time series data)
+    'steel_industry_energy_consumption': 851,  # Medium, 15 features (time series data)
     'bike_sharing': 275,            # Medium, 16 features (mixed)
     'adult': 2,                     # Large, 14 features
     'dry_bean': 602,                # Large, 16 features
-    'individual_household_electric_power_consumption': 235,  # Large, 7 features (time series data)
+    'infrared_thermography_temperature': 925,  # Large, 7 features (time series data)
     'optical_recognition_of_handwritten_digits': 80,  # Large, 64 features (image data)
 }
 
@@ -253,7 +253,7 @@ def load_and_define_parameters(dataset):
         'heart_disease': {
             'problem_type': "classification",
             'INPUT_LAYER_SIZE': 13,
-            'OUTPUT_LAYER_SIZE': 2
+            'OUTPUT_LAYER_SIZE': 1
         },
         'bank_marketing': {
             'problem_type': "classification",
@@ -295,7 +295,7 @@ def load_and_define_parameters(dataset):
             'INPUT_LAYER_SIZE': 26,
             'OUTPUT_LAYER_SIZE': 1
         },
-        'air_quality': {
+        'steel_industry_energy_consumption': {
             'problem_type': "regression",
             'INPUT_LAYER_SIZE': 15,
             'OUTPUT_LAYER_SIZE': 1
@@ -305,10 +305,10 @@ def load_and_define_parameters(dataset):
             'INPUT_LAYER_SIZE': 16,
             'OUTPUT_LAYER_SIZE': 1
         },
-        'individual_household_electric_power_consumption': {
+        'infrared_thermography_temperature': {
             'problem_type': "regression",
-            'INPUT_LAYER_SIZE': 7,
-            'OUTPUT_LAYER_SIZE': 1
+            'INPUT_LAYER_SIZE': 33,
+            'OUTPUT_LAYER_SIZE': 2
         }
     }
 

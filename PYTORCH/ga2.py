@@ -114,11 +114,11 @@ def load_and_preprocess_data(dataset_id):
     # Separate features and target variable
     X = dataset.data.features  # X is a DataFrame
     y = dataset.data.targets  # y can be a DataFrame or Series
-    
-    # If y is a DataFrame with a single column, convert it to a Series
-    if isinstance(y, pd.DataFrame) and y.shape[1] == 1:
-        y = y.iloc[:, 0]
-    
+
+    # Check if y is None
+    if y is None:
+        raise ValueError("The target variable 'y' is None. Please check the dataset.")
+
     # Convert categorical features to dummy/one-hot encoded variables
     X = pd.get_dummies(X)  # Convert categorical features to one-hot encoded variables
     
@@ -127,28 +127,32 @@ def load_and_preprocess_data(dataset_id):
     
     # Process the target variable depending on the problem type
     if problem_type == "classification":
-        if y.dtype == object or (isinstance(y, pd.Series) and y.dtype.name == 'category'):
+        if (isinstance(y, pd.DataFrame) and any(y.dtypes == object)) or \
+        (isinstance(y, pd.Series) and y.dtype == object) or \
+        (y.dtypes.name == 'category'):
             # Convert string labels to integers
             le = LabelEncoder()
             y = le.fit_transform(y)
-        
+            
         # Handle missing values (e.g., fill with -1) in classification target
         y = np.where(np.isnan(y.astype(float)), -1, y)
         y = y.astype("float32")  # Convert target to float32 for compatibility
 
     elif problem_type == "regression":
-        if y.dtype == object:
-            # Convert string labels to numeric, coercing errors
-            y = pd.to_numeric(y, errors='coerce')
+        # Ensure y is treated appropriately whether it's a Series or DataFrame
+        y = y.apply(pd.to_numeric, errors='coerce') if isinstance(y, pd.DataFrame) else pd.to_numeric(y, errors='coerce')
         
         # Handle missing values (e.g., fill with mean) in regression target
-        y_mean = np.nanmean(y)
-        y = np.where(np.isnan(y), y_mean, y)
-        
-        # Replace infinities with NaN and then with mean
-        y = np.where(np.isinf(y), np.nan, y)
-        y = np.where(np.isnan(y), y_mean, y)
-        y = y.astype("float32")  # Convert target to float32 for compatibility
+        if y.isnull().any().any() if isinstance(y, pd.DataFrame) else y.isnull().any():
+            y = y.fillna(y.mean())
+
+        # Replace infinities with NaN and then fill them with mean
+        y = y.replace([np.inf, -np.inf], np.nan)
+        if y.isnull().any().any() if isinstance(y, pd.DataFrame) else y.isnull().any():
+            y = y.fillna(y.mean())
+
+        # Ensure that y is now a float32 numpy array
+        y = y.astype('float32')
 
     # Normalize the features
     scaler = StandardScaler()
@@ -158,16 +162,14 @@ def load_and_preprocess_data(dataset_id):
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
-    # Convert to NumPy arrays and ensure they're in float32 format (already done)
-    # Convert NumPy arrays to PyTorch tensors
-    X_train = torch.tensor(X_train, dtype=torch.float32).to(device)
-    y_train = torch.tensor(y_train, dtype=torch.float32).to(device)
-    X_val = torch.tensor(X_val, dtype=torch.float32).to(device)
-    y_val = torch.tensor(y_val, dtype=torch.float32).to(device)
-    X_test = torch.tensor(X_test, dtype=torch.float32).to(device)
-    y_test = torch.tensor(y_test, dtype=torch.float32).to(device)
-    
+    # Convert y_train, y_val, and y_test to tensors
+    y_train = torch.tensor(y_train.values if isinstance(y_train, pd.DataFrame) else y_train, dtype=torch.float32).to(device)
+    y_val = torch.tensor(y_val.values if isinstance(y_val, pd.DataFrame) else y_val, dtype=torch.float32).to(device)
+    y_test = torch.tensor(y_test.values if isinstance(y_test, pd.DataFrame) else y_test, dtype=torch.float32).to(device)
+
     return X_train, y_train, X_val, y_val, X_test, y_test
+
+
 
 def callback_generation(ga_instance):
     global best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed, fitness_scores, ticks_generation
@@ -245,14 +247,27 @@ def generatePopulation(sol_per_pop):
 
 def fitness_func(ga_instance, solution, solution_idx):
     global gen_num_printed
-    # print(".. Fitness function ..")    
 
     # Create a neural network from the solution array
     solution_nn = array_to_nn(solution).to(device)
     
+    # Ensure X_train and y_train have matching first dimensions
+    if X_train.shape[0] != y_train.shape[0]:
+        raise ValueError(f"Mismatch in number of samples between X_train and y_train. X_train has {X_train.shape[0]} samples, but y_train has {y_train.shape[0]} samples.")
+    
+    if X_test.shape[0] != y_test.shape[0]:
+        raise ValueError(f"Mismatch in number of samples between X_test and y_test. X_test has {X_test.shape[0]} samples, but y_test has {y_test.shape[0]} samples.")
+    
+    # Convert X_train, y_train, X_test, and y_test to tensors if they aren't already
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device) if not isinstance(X_train, torch.Tensor) else X_train
+    y_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device) if not isinstance(y_train, torch.Tensor) else y_train
+    
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32).to(device) if not isinstance(X_test, torch.Tensor) else X_test
+    y_test_tensor = torch.tensor(y_test, dtype=torch.float32).to(device) if not isinstance(y_test, torch.Tensor) else y_test
+
     # Create DataLoader for training and validation
-    train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=int(solution_nn.batch_size), shuffle=True)
-    val_loader = DataLoader(TensorDataset(X_test, y_test), batch_size=int(solution_nn.batch_size), shuffle=False)
+    train_loader = DataLoader(TensorDataset(X_train_tensor, y_train_tensor), batch_size=int(solution_nn.batch_size), shuffle=True)
+    val_loader = DataLoader(TensorDataset(X_test_tensor, y_test_tensor), batch_size=int(solution_nn.batch_size), shuffle=False)
 
     # Train the neural network
     solution_nn.train_model(train_loader, val_loader)
@@ -262,7 +277,6 @@ def fitness_func(ga_instance, solution, solution_idx):
 
     # Check if validation_loss is NaN
     if torch.isnan(torch.tensor(validation_loss)):
-        # print("Validation loss is NaN, setting fitness score to a very low value.")
         fitness_score = -np.inf
     else:
         # Calculate the number of layers and total number of neurons
@@ -282,9 +296,9 @@ def fitness_func(ga_instance, solution, solution_idx):
         # Calculate the fitness score
         small_value = 1e-8
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
-        # print("Fitness score: ", fitness_score)
 
     return fitness_score
+
 
 
 def custom_crossover(parents, offspring_size, ga_instance):
@@ -722,6 +736,29 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
+    # for dataset in DATASET_LIST:
+    #     print("Dataset: ", dataset)
+    #     problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
+    #     print("Problem type: ", problem_type)
+    #     print("Max layers: ", MAX_LAYERS)
+    #     print("Max layer size: ", MAX_LAYER_SIZE)
+    #     print("Input layer size: ", INPUT_LAYER_SIZE)
+    #     print("Output layer size: ", OUTPUT_LAYER_SIZE)
+    #     print("Activations: ", ACTIVATIONS)
+    #     print("Output activations: ", ACTIVATIONS_OUTPUT)
+    #     print("\n")
+    #     dataset_id = DATASET_LIST[dataset]
+    #     X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_id=dataset_id)
+    #     print("X_train shape: ", X_train.shape)
+    #     print("y_train shape: ", y_train.shape)
+    #     print("X_val shape: ", X_val.shape)
+    #     print("y_val shape: ", y_val.shape)
+    #     print("X_test shape: ", X_test.shape)
+    #     print("y_test shape: ", y_test.shape)
+    #     print("\n")
+    #     print("————————————————————————————————————————————————————————————")
+        
+    
     # num_datasets = len(DATASET_LIST)
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
     
