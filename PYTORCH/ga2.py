@@ -109,72 +109,84 @@ def load_and_preprocess_data(dataset):
 
     # Below are the additional datasets from UCI repositoryelif dataset == 'adult':
         data = fetch_openml('adult', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target).astype("float32")
+        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
+        X = X.astype("float32")
 
     elif dataset == 'wine':
         data = fetch_openml('wine', version=1)
-        X, y = data.data.values, LabelEncoder().fit_transform(data.target).astype("float32")
+        X, y = data.data.values, LabelEncoder().fit_transform(data.target)
+        X = X.astype("float32")
 
     elif dataset == 'breast_cancer':
         data = fetch_openml('breast-cancer', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target).astype("float32")
+        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
+        X = X.astype("float32")
 
     elif dataset == 'heart_disease':
         data = fetch_openml('heart-disease', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target).astype("float32")
+        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
+        X = X.astype("float32")
 
     elif dataset == 'thyroid_disease':
         data = fetch_openml('thyroid-disease', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target).astype("float32")
+        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
+        X = X.astype("float32")
 
     elif dataset == 'census_income':
         data = fetch_openml('census-income', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target).astype("float32")
+        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
+        X = X.astype("float32")
 
     elif dataset == 'auto_mpg':
         data = fetch_openml('autoMpg', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.astype("float32")
+        X, y = pd.get_dummies(data.data).values, data.target.values
+        X = X.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
     elif dataset == 'concrete':
         data = fetch_openml('concrete', version=1)
-        X, y = data.data.values, data.target.astype("float32")
+        X, y = data.data.values, data.target.values
+        X = X.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
     elif dataset == 'abalone':
         data = fetch_openml('abalone', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.astype("float32")
+        X, y = pd.get_dummies(data.data).values, data.target.values
+        X = X.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
     elif dataset == 'housing':
         data = fetch_openml('housing', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.astype("float32")
+        X, y = pd.get_dummies(data.data).values, data.target.values
+        X = X.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
     elif dataset == 'energy_efficiency':
         data = fetch_openml('energy-efficiency', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.astype("float32")
+        X, y = pd.get_dummies(data.data).values, data.target.values
+        X = X.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
     elif dataset == 'kin8nm':
         data = fetch_openml('kin8nm', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.astype("float32")
+        X, y = pd.get_dummies(data.data).values, data.target.values
+        X = X.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
-    # Split the data into training, validation, and test sets
+    # Ensure conversion to NumPy arrays
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
-    # Convert to the correct dtype
-    X_train, y_train = X_train.astype("float32"), y_train.astype("float32")
-    X_val, y_val = X_val.astype("float32"), y_val.astype("float32")
-    X_test, y_test = X_test.astype("float32"), y_test.astype("float32")
+    # Convert to the correct dtype and ensure they're NumPy arrays
+    X_train, y_train = np.array(X_train, dtype="float32"), np.array(y_train, dtype="float32")
+    X_val, y_val = np.array(X_val, dtype="float32"), np.array(y_val, dtype="float32")
+    X_test, y_test = np.array(X_test, dtype="float32"), np.array(y_test, dtype="float32")
 
     # Convert NumPy arrays to PyTorch tensors
     X_train, y_train = torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.float32)
@@ -742,7 +754,7 @@ def geneticAlgorithm(ga_index):
 
 if __name__ == '__main__':
     num_datasets = len(DATASET_LIST)//2
-    ticks_dataset = tqdm(total=num_datasets-1, desc="Datasets", unit="dataset", colour="green")
+    ticks_dataset = tqdm(total=num_datasets, desc="Datasets", unit="dataset", colour="green")
     
     for dataset_i in range(num_datasets, len(DATASET_LIST)): 
         dataset = DATASET_LIST[dataset_i]
