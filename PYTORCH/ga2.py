@@ -45,9 +45,9 @@ generation_counter = 1
 
 gen_num_printed = True
 
-# Ensure the directory exists
-log_dir = f"./logs/{problem_type}/{dataset}"
-os.makedirs(log_dir, exist_ok=True)
+# # Ensure the directory exists
+# log_dir = f"./logs/{problem_type}/{dataset}"
+# os.makedirs(log_dir, exist_ok=True)
 
 # Set up logging
 # logging.basicConfig(filename=f"{log_dir}/memory_usage.log", level=logging.INFO, format='%(asctime)s - %(message)s')
