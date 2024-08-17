@@ -59,29 +59,46 @@ os.makedirs(log_dir, exist_ok=True)
 #     # for stat in top_stats[:10]:
 #     #     logging.info(stat)
         
-        
 """
 Datasets Included
 
 Classification:
-Iris - Small, 4 features.
-MNIST - Large, image data with 784 features.
-Adult - Medium, 14 features.
-Wine - Small, 13 features.
-Breast Cancer - Medium, mixed features.
-Heart Disease - Medium, mixed features.
-Thyroid Disease - Medium, mixed features.
-Census Income - Large, demographic features.
+1. Iris - Small, 4 features.
+   Description: A classic dataset for classifying iris plants based on petal and sepal measurements.
+2. Wine - Small, 13 features.
+   Description: Classify wine samples into three classes based on chemical analysis.
+3. Breast Cancer - Medium, 30 features (mixed).
+   Description: Binary classification for diagnosing breast cancer using various cell attributes.
+4. Heart Disease - Medium, 13 features (mixed).
+   Description: Predict the presence of heart disease using clinical and demographic data.
+5. Thyroid Disease - Medium, 21 features (mixed).
+   Description: Multi-class classification of thyroid conditions using medical data.
+6. Adult - Medium, 14 features.
+   Description: Predict income levels based on demographic attributes.
+7. Fashion-MNIST - Large, image data with 784 features.
+   Description: Classify clothing items based on grayscale images of 28x28 pixels.
+8. MNIST - Large, image data with 784 features.
+   Description: Handwritten digit classification task with 10 classes (digits 0-9).
 
 Regression:
-California Housing - Large, 8 features.
-Diabetes - Medium, 10 features.
-Auto MPG - Small, mixed features.
-Concrete - Medium, 8 features.
-Abalone - Medium, 8 features.
-Housing - Small, 14 features.
-Energy Efficiency - Small, mixed features.
-Kin8nm - Medium, mixed features."""
+1. Auto MPG - Small, 7 features (mixed).
+   Description: Predict vehicle fuel efficiency (miles per gallon) based on car specifications.
+2. Energy Efficiency - Small, 8 features (mixed).
+   Description: Predict the energy efficiency of buildings in terms of heating and cooling loads based on structural attributes.
+3. Bike Sharing - Medium, 16 features.
+   Description: Predict the number of bike rentals based on environmental conditions and seasonal factors.
+4. Concrete - Medium, 8 features.
+   Description: Predict the compressive strength of concrete based on its composition and age.
+5. Abalone - Medium, 8 features.
+   Description: Predict the age of abalone from physical measurements such as shell diameter and weight.
+6. Kin8nm - Medium, 8 features (mixed).
+   Description: Predict the forward kinematics of an 8-link robot arm based on joint angles.
+7. Diabetes - Medium, 10 features.
+   Description: Predict the progression of diabetes one year after baseline using various clinical measurements.
+8. California Housing - Large, 8 features.
+   Description: Predict house prices in California districts based on demographic and geographic features.
+
+"""
 
 def load_and_preprocess_data(dataset):
     if dataset == 'iris':
@@ -93,7 +110,7 @@ def load_and_preprocess_data(dataset):
         mnist = fetch_openml('mnist_784', version=1)
         X, y = mnist["data"].astype("float32") / 255.0, mnist["target"].astype("int64")
 
-    elif dataset == 'california':
+    elif dataset == 'california_housing':
         california = fetch_california_housing()
         X = california.data.astype("float32")
         y = california.target.astype("float32")
@@ -107,92 +124,69 @@ def load_and_preprocess_data(dataset):
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
-    # Below are the additional datasets from UCI repositoryelif dataset == 'adult':
-        data = fetch_openml('adult', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
-        X = X.astype("float32")
-
-    elif dataset == 'wine':
-        data = fetch_openml('wine', version=1)
-        X, y = data.data.values, LabelEncoder().fit_transform(data.target)
-        X = X.astype("float32")
-
-    elif dataset == 'breast_cancer':
-        data = fetch_openml('breast-cancer', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
-        X = X.astype("float32")
-
-    elif dataset == 'heart_disease':
-        data = fetch_openml('heart-disease', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
-        X = X.astype("float32")
-
-    elif dataset == 'thyroid_disease':
-        data = fetch_openml('thyroid-disease', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
-        X = X.astype("float32")
-
-    elif dataset == 'census_income':
-        data = fetch_openml('census-income', version=1)
-        X, y = pd.get_dummies(data.data).values, LabelEncoder().fit_transform(data.target)
-        X = X.astype("float32")
-
-    elif dataset == 'auto_mpg':
-        data = fetch_openml('autoMpg', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.values
-        X = X.astype("float32")
+    elif dataset == 'bike_sharing':
+        bike_sharing = fetch_openml('Bike_Sharing_Demand', version=2)
+        data = bike_sharing.data
+        X = pd.get_dummies(data).values.astype("float32")
+        y = bike_sharing.target.astype("float32")
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
 
-    elif dataset == 'concrete':
-        data = fetch_openml('concrete', version=1)
-        X, y = data.data.values, data.target.values
-        X = X.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
+    else:
+        # Fetching dataset using OpenML for other cases
+        data = fetch_openml(dataset, version=1)
 
-    elif dataset == 'abalone':
-        data = fetch_openml('abalone', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.values
-        X = X.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
+        # Handling features (X)
+        X = pd.get_dummies(data.data).values.astype("float32")
+        
+        # Handling target (y)
+        y = data.target
+        print(f"Before transformation: Type of y: {type(y)}, Shape of y: {y.shape}")
+        
+        # Convert to NumPy array if necessary
+        if isinstance(y, pd.Series):
+            y = y.to_numpy()
+        elif isinstance(y, pd.DataFrame):
+            y = y.values
+        
+        # Ensure y is flattened to a 1D array
+        y = y.ravel()
+        print(f"After transformation: Shape of y: {y.shape}")
+        
+        # Apply LabelEncoder if y is categorical (for classification problems)
+        if dataset in ['adult', 'wine', 'breast-cancer-wisconsin', 'heart-disease', 'thyroid101', 
+                       'Fashion-MNIST']:
+            y = LabelEncoder().fit_transform(y)
+            y = y.astype("int64")
+        
+        print(f"Final shape of y: {y.shape}")
 
-    elif dataset == 'housing':
-        data = fetch_openml('housing', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.values
-        X = X.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
-
-    elif dataset == 'energy_efficiency':
-        data = fetch_openml('energy-efficiency', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.values
-        X = X.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
-
-    elif dataset == 'kin8nm':
-        data = fetch_openml('kin8nm', version=1)
-        X, y = pd.get_dummies(data.data).values, data.target.values
-        X = X.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
-
-    # Ensure conversion to NumPy arrays
+    # Ensure conversion to NumPy arrays and split the dataset
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
     # Convert to the correct dtype and ensure they're NumPy arrays
-    X_train, y_train = np.array(X_train, dtype="float32"), np.array(y_train, dtype="float32")
-    X_val, y_val = np.array(X_val, dtype="float32"), np.array(y_val, dtype="float32")
-    X_test, y_test = np.array(X_test, dtype="float32"), np.array(y_test, dtype="float32")
+    X_train = np.array(X_train, dtype="float32")
+    X_val = np.array(X_val, dtype="float32")
+    X_test = np.array(X_test, dtype="float32")
+
+    # Adjust the dtype of y depending on the task
+    if dataset in ['california_housing', 'diabetes', 'bike_sharing', 'autoMpg', 'Concrete_Data', 'abalone', 
+                   'energy-efficiency', 'kin8nm']:
+        y_train = np.array(y_train, dtype="float32")
+        y_val = np.array(y_val, dtype="float32")
+        y_test = np.array(y_test, dtype="float32")
+    else:
+        y_train = np.array(y_train, dtype="int64")
+        y_val = np.array(y_val, dtype="int64")
+        y_test = np.array(y_test, dtype="int64")
 
     # Convert NumPy arrays to PyTorch tensors
-    X_train, y_train = torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.float32)
-    X_val, y_val = torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val, dtype=torch.float32)
-    X_test, y_test = torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test, dtype=torch.float32)
+    X_train, y_train = torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train)
+    X_val, y_val = torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val)
+    X_test, y_test = torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test)
 
+    # Move tensors to the appropriate device (e.g., GPU)
     X_train, y_train = X_train.to(device), y_train.to(device)
     X_val, y_val = X_val.to(device), y_val.to(device)
     X_test, y_test = X_test.to(device), y_test.to(device)
@@ -756,7 +750,7 @@ if __name__ == '__main__':
     num_datasets = len(DATASET_LIST)//2
     ticks_dataset = tqdm(total=num_datasets, desc="Datasets", unit="dataset", colour="green")
     
-    for dataset_i in range(num_datasets, len(DATASET_LIST)): 
+    for dataset_i in range(0, num_datasets): 
         dataset = DATASET_LIST[dataset_i]
         
         ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)

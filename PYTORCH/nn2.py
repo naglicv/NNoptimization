@@ -9,25 +9,28 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 BEG_PARAMS = ("learning_rate", "batch_size", "epochs", "patience")
 
-# Dataset selection and parameters
 DATASET_LIST = [
-    'iris',             # Classification
-    'wine',             # Classification
-    'adult',            # Classification
-    'breast_cancer',    # Classification
-    'heart_disease',    # Classification
-    'thyroid_disease',  # Classification
-    'mnist',            # Classification
-    'census_income',    # Classification
-    'auto_mpg',         # Regression
-    'housing',          # Regression
-    'energy_efficiency',# Regression
-    'kin8nm'            # Regression
-    'abalone',          # Regression
-    'concrete',         # Regression
-    'diabetes',         # Regression
-    'california',       # Regression
+    # Classification Datasets
+    'iris',                     # Small, 4 features
+    'wine',                     # Small, 13 features
+    'adult',                    # Medium, 14 features
+    'breast-cancer-wisconsin',  # Medium, 30 features (mixed)
+    'heart-disease',            # Medium, 13 features (mixed)
+    'thyroid101',               # Medium, 21 features (mixed)
+    'Fashion-MNIST',            # Large, image data with 784 features
+    'mnist',                    # Large, image data with 784 features
+    
+    # Regression Datasets
+    'autoMpg',                  # Small, 7 features (mixed)
+    'energy-efficiency',        # Small, 8 features (mixed)
+    'Concrete_Data',            # Medium, 8 features
+    'abalone',                  # Medium, 8 features
+    'kin8nm',                   # Medium, 8 features (mixed)
+    'diabetes',                 # Medium, 10 features
+    'bike_sharing',             # Medium, 16 features
+    'california_housing',       # Large, 8 features
 ]
+
 
 
 dataset, problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = None, None, None, None, None, None, None, None
