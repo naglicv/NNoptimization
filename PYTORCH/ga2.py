@@ -220,11 +220,11 @@ def callback_generation(ga_instance):
     # Early stopping check
     if patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
-        ticks_generation.count = ticks_generation.total
-        ticks_generation.refresh()
+        ticks_generation.update(300)
+
         return "stop"
     
-    ticks_generation.update()
+    ticks_generation.update(ga_instance.generations_completed)
     # print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
 def generatePopulation(sol_per_pop):
@@ -756,7 +756,7 @@ if __name__ == '__main__':
     num_datasets = len(DATASET_LIST)//2
     ticks_dataset = tqdm(total=num_datasets, desc="Datasets", unit="dataset", colour="green")
     
-    for dataset_i in range(num_datasets, len(DATASET_LIST)): 
+    for dataset_i in range(1, num_datasets): 
         dataset = DATASET_LIST[dataset_i]
         
         ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)
@@ -863,7 +863,7 @@ if __name__ == '__main__':
             del ga_instance
             torch.cuda.empty_cache()  # Clear GPU memory cache  
             
-            ticks_penalty.update()
+            ticks_penalty.update(i)
         ticks_penalty.close()
-        ticks_dataset.update()
+        ticks_dataset.update(dataset_i)
     ticks_dataset.close()   
