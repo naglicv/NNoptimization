@@ -11,7 +11,7 @@ import warnings
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.datasets import load_iris, fetch_california_housing, load_diabetes, fetch_openml
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from nn2 import *
 
 # Check if CUDA (GPU support) is available
