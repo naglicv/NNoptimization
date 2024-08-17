@@ -168,7 +168,7 @@ def load_and_preprocess_data(dataset_id):
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 def callback_generation(ga_instance):
-    global best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed, fitness_scores
+    global best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed, fitness_scores, ticks_generation
     
     # Save the fitness score for the best and the average solution in each generation
     best_fitness_current = np.max(ga_instance.last_generation_fitness)
@@ -187,11 +187,11 @@ def callback_generation(ga_instance):
     # Early stopping check
     if patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
-        ticks_generation.update(300)
+        ticks_generation.update(300 - ticks_generation.n)
 
         return "stop"
     
-    ticks_generation.update(ga_instance.generations_completed)
+    ticks_generation.update(ga_instance.generations_completed - ticks_generation.n)
     # print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
 def generatePopulation(sol_per_pop):
@@ -830,7 +830,7 @@ if __name__ == '__main__':
             del ga_instance
             torch.cuda.empty_cache()  # Clear GPU memory cache  
             
-            ticks_penalty.update(i)
+            ticks_penalty.update(i - ticks_penalty.n)
         ticks_penalty.close()
-        ticks_dataset.update(dataset_i)
+        ticks_dataset.update(dataset_i - ticks_dataset.n)
     ticks_dataset.close()   
