@@ -756,7 +756,7 @@ if __name__ == '__main__':
     num_datasets = len(DATASET_LIST)//2
     ticks_dataset = tqdm(total=num_datasets, desc="Datasets", unit="dataset", colour="green")
     
-    for dataset_i in range(1, num_datasets): 
+    for dataset_i in range(num_datasets, len(DATASET_LIST)): 
         dataset = DATASET_LIST[dataset_i]
         
         ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)

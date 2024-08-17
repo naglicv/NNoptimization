@@ -12,21 +12,21 @@ BEG_PARAMS = ("learning_rate", "batch_size", "epochs", "patience")
 # Dataset selection and parameters
 DATASET_LIST = [
     'iris',             # Classification
-    'mnist',            # Classification
-    'adult',            # Classification
     'wine',             # Classification
+    'adult',            # Classification
     'breast_cancer',    # Classification
     'heart_disease',    # Classification
     'thyroid_disease',  # Classification
+    'mnist',            # Classification
     'census_income',    # Classification
-    'california',       # Regression
-    'diabetes',         # Regression
     'auto_mpg',         # Regression
-    'concrete',         # Regression
-    'abalone',          # Regression
     'housing',          # Regression
     'energy_efficiency',# Regression
     'kin8nm'            # Regression
+    'abalone',          # Regression
+    'concrete',         # Regression
+    'diabetes',         # Regression
+    'california',       # Regression
 ]
 
 
