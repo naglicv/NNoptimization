@@ -33,6 +33,30 @@ DATASET_LIST_REG = {
     'individual_household_electric_power_consumption': 235,  # Large, 7 features (time series data)
 }
 
+DATASET_LIST_SMALL = {
+    # Classification Datasets
+    'iris': 53,                     # Small, 4 features
+    'wine': 109,                    # Small, 13 features
+    'auto_mpg': 9,                  # Small, 7 features (mixed)
+    'energy_efficiency': 242,       # Small, 8 features
+    'breast_cancer_wisconsin_original': 15,  # Small, 9 features
+    'heart_disease': 45,            # Medium, 13 features (mixed)
+    'concrete_compressive_strength': 165,  # Medium, 8 features
+    'abalone': 1,                   # Medium, 8 features
+}
+
+DATASET_LIST_LARGE = {
+    # Regression Datasets
+    'bank_marketing': 222,          # Medium, 16 features (mixed)
+    'parkinsons_telemonitoring': 189,  # Medium, 26 features (time series data)
+    'air_quality': 360,             # Medium, 15 features (time series data)
+    'bike_sharing': 275,            # Medium, 16 features (mixed)
+    'adult': 2,                     # Large, 14 features
+    'dry_bean': 602,                # Large, 16 features
+    'individual_household_electric_power_consumption': 235,  # Large, 7 features (time series data)
+    'optical_recognition_of_handwritten_digits': 80,  # Large, 64 features (image data)
+}
+
 
 
 

@@ -17,7 +17,9 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from nn2 import *
 
 # DATASET_LIST = DATASET_LIST_CLASS
-DATASET_LIST = DATASET_LIST_REG
+# DATASET_LIST = DATASET_LIST_REG
+# DATASET_LIST = DATASET_LIST_SMALL
+DATASET_LIST = DATASET_LIST_LARGE
 
 # Check if CUDA (GPU support) is available
 if torch.cuda.is_available():
