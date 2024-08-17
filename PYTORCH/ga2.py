@@ -8,11 +8,16 @@ from tqdm import tqdm
 import pandas as pd
 import torch
 import warnings
+from ucimlrepo import fetch_ucirepo 
+
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.datasets import load_iris, fetch_california_housing, load_diabetes, fetch_openml
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from nn2 import *
+
+# DATASET_LIST = DATASET_LIST_CLASS
+DATASET_LIST = DATASET_LIST_REG
 
 # Check if CUDA (GPU support) is available
 if torch.cuda.is_available():
@@ -100,99 +105,67 @@ Regression:
 
 """
 
-def load_and_preprocess_data(dataset):
-    if dataset == 'iris':
-        iris = load_iris()
-        X = iris.data.astype("float32")
-        y = iris.target.astype("int64")
-
-    elif dataset == 'mnist':
-        mnist = fetch_openml('mnist_784', version=1)
-        X, y = mnist["data"].astype("float32") / 255.0, mnist["target"].astype("int64")
-
-    elif dataset == 'california_housing':
-        california = fetch_california_housing()
-        X = california.data.astype("float32")
-        y = california.target.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
-
-    elif dataset == 'diabetes':
-        diabetes = load_diabetes()
-        X = diabetes.data.astype("float32")
-        y = diabetes.target.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
-
-    elif dataset == 'bike_sharing':
-        bike_sharing = fetch_openml('Bike_Sharing_Demand', version=2)
-        data = bike_sharing.data
-        X = pd.get_dummies(data).values.astype("float32")
-        y = bike_sharing.target.astype("float32")
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
-
-    else:
-        # Fetching dataset using OpenML for other cases
-        data = fetch_openml(dataset, version=1)
-
-        # Handling features (X)
-        X = pd.get_dummies(data.data).values.astype("float32")
+def load_and_preprocess_data(dataset_id):
+    # Fetch the dataset using the dataset ID
+    dataset = fetch_ucirepo(id=dataset_id)
+    
+    # Separate features and target variable
+    X = dataset.data.features  # X is a DataFrame
+    y = dataset.data.targets  # y can be a DataFrame or Series
+    
+    # If y is a DataFrame with a single column, convert it to a Series
+    if isinstance(y, pd.DataFrame) and y.shape[1] == 1:
+        y = y.iloc[:, 0]
+    
+    # Convert categorical features to dummy/one-hot encoded variables
+    X = pd.get_dummies(X)  # Convert categorical features to one-hot encoded variables
+    
+    # Ensure all features are in float32 format
+    X = X.astype("float32")
+    
+    # Process the target variable depending on the problem type
+    if problem_type == "classification":
+        if y.dtype == object or (isinstance(y, pd.Series) and y.dtype.name == 'category'):
+            # Convert string labels to integers
+            le = LabelEncoder()
+            y = le.fit_transform(y)
         
-        # Handling target (y)
-        y = data.target
-        print(f"Before transformation: Type of y: {type(y)}, Shape of y: {y.shape}")
-        
-        # Convert to NumPy array if necessary
-        if isinstance(y, pd.Series):
-            y = y.to_numpy()
-        elif isinstance(y, pd.DataFrame):
-            y = y.values
-        
-        # Ensure y is flattened to a 1D array
-        y = y.ravel()
-        print(f"After transformation: Shape of y: {y.shape}")
-        
-        # Apply LabelEncoder if y is categorical (for classification problems)
-        if dataset in ['adult', 'wine', 'breast-cancer-wisconsin', 'heart-disease', 'thyroid101', 
-                       'Fashion-MNIST']:
-            y = LabelEncoder().fit_transform(y)
-            y = y.astype("int64")
-        
-        print(f"Final shape of y: {y.shape}")
+        # Handle missing values (e.g., fill with -1) in classification target
+        y = np.where(np.isnan(y.astype(float)), -1, y)
+        y = y.astype("float32")  # Convert target to float32 for compatibility
 
-    # Ensure conversion to NumPy arrays and split the dataset
+    elif problem_type == "regression":
+        if y.dtype == object:
+            # Convert string labels to numeric, coercing errors
+            y = pd.to_numeric(y, errors='coerce')
+        
+        # Handle missing values (e.g., fill with mean) in regression target
+        y_mean = np.nanmean(y)
+        y = np.where(np.isnan(y), y_mean, y)
+        
+        # Replace infinities with NaN and then with mean
+        y = np.where(np.isinf(y), np.nan, y)
+        y = np.where(np.isnan(y), y_mean, y)
+        y = y.astype("float32")  # Convert target to float32 for compatibility
+
+    # Normalize the features
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
+    
+    # Split the data into training, validation, and test sets
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
-    # Convert to the correct dtype and ensure they're NumPy arrays
-    X_train = np.array(X_train, dtype="float32")
-    X_val = np.array(X_val, dtype="float32")
-    X_test = np.array(X_test, dtype="float32")
-
-    # Adjust the dtype of y depending on the task
-    if dataset in ['california_housing', 'diabetes', 'bike_sharing', 'autoMpg', 'Concrete_Data', 'abalone', 
-                   'energy-efficiency', 'kin8nm']:
-        y_train = np.array(y_train, dtype="float32")
-        y_val = np.array(y_val, dtype="float32")
-        y_test = np.array(y_test, dtype="float32")
-    else:
-        y_train = np.array(y_train, dtype="int64")
-        y_val = np.array(y_val, dtype="int64")
-        y_test = np.array(y_test, dtype="int64")
-
+    # Convert to NumPy arrays and ensure they're in float32 format (already done)
     # Convert NumPy arrays to PyTorch tensors
-    X_train, y_train = torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train)
-    X_val, y_val = torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val)
-    X_test, y_test = torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test)
-
-    # Move tensors to the appropriate device (e.g., GPU)
-    X_train, y_train = X_train.to(device), y_train.to(device)
-    X_val, y_val = X_val.to(device), y_val.to(device)
-    X_test, y_test = X_test.to(device), y_test.to(device)
+    X_train = torch.tensor(X_train, dtype=torch.float32).to(device)
+    y_train = torch.tensor(y_train, dtype=torch.float32).to(device)
+    X_val = torch.tensor(X_val, dtype=torch.float32).to(device)
+    y_val = torch.tensor(y_val, dtype=torch.float32).to(device)
+    X_test = torch.tensor(X_test, dtype=torch.float32).to(device)
+    y_test = torch.tensor(y_test, dtype=torch.float32).to(device)
     
     return X_train, y_train, X_val, y_val, X_test, y_test
-
 
 def callback_generation(ga_instance):
     global best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed, fitness_scores
@@ -747,11 +720,11 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    num_datasets = len(DATASET_LIST)//2
-    ticks_dataset = tqdm(total=num_datasets, desc="Datasets", unit="dataset", colour="green")
+    # num_datasets = len(DATASET_LIST)
+    ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
     
-    for dataset_i in range(0, num_datasets): 
-        dataset = DATASET_LIST[dataset_i]
+    for dataset_i, dataset in enumerate(DATASET_LIST): 
+        dataset_id = DATASET_LIST[dataset]
         
         ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)
         
@@ -760,14 +733,14 @@ if __name__ == '__main__':
         # print(f"————————————————————————————————————————————————————————————")
         
         # Load the parameters for the selected dataset
-        problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset)
+        problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
         
         # Set up the output directory
         output_dir = f"./logs/{problem_type}/{dataset}/"
         os.makedirs(output_dir, exist_ok=True)
 
         # Load and preprocess the dataset
-        X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset)
+        X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_id=dataset_id)
 
         for i, penalty_mult in enumerate(penalty_mult_list):
             # print(f"——————————————————————————————————————————")

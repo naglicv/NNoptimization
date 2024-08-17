@@ -9,27 +9,32 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 BEG_PARAMS = ("learning_rate", "batch_size", "epochs", "patience")
 
-DATASET_LIST = [
+DATASET_LIST_CLASS = {
     # Classification Datasets
-    'iris',                     # Small, 4 features
-    'wine',                     # Small, 13 features
-    'adult',                    # Medium, 14 features
-    'breast-cancer-wisconsin',  # Medium, 30 features (mixed)
-    'heart-disease',            # Medium, 13 features (mixed)
-    'thyroid101',               # Medium, 21 features (mixed)
-    'Fashion-MNIST',            # Large, image data with 784 features
-    'mnist',                    # Large, image data with 784 features
-    
+    'iris': 53,                     # Small, 4 features
+    'wine': 109,                    # Small, 13 features
+    'adult': 2,                     # Large, 14 features
+    'breast_cancer_wisconsin_original': 15,  # Small, 9 features
+    'heart_disease': 45,            # Medium, 13 features (mixed)
+    'bank_marketing': 222,          # Medium, 16 features (mixed)
+    'dry_bean': 602,                # Large, 16 features
+    'optical_recognition_of_handwritten_digits': 80,  # Large, 64 features (image data)
+}
+
+DATASET_LIST_REG = {
     # Regression Datasets
-    'autoMpg',                  # Small, 7 features (mixed)
-    'energy-efficiency',        # Small, 8 features (mixed)
-    'Concrete_Data',            # Medium, 8 features
-    'abalone',                  # Medium, 8 features
-    'kin8nm',                   # Medium, 8 features (mixed)
-    'diabetes',                 # Medium, 10 features
-    'bike_sharing',             # Medium, 16 features
-    'california_housing',       # Large, 8 features
-]
+    'auto_mpg': 9,                  # Small, 7 features (mixed)
+    'energy_efficiency': 242,       # Small, 8 features
+    'concrete_compressive_strength': 165,  # Medium, 8 features
+    'abalone': 1,                   # Medium, 8 features
+    'parkinsons_telemonitoring': 189,  # Medium, 26 features (time series data)
+    'air_quality': 360,             # Medium, 15 features (time series data)
+    'bike_sharing': 275,            # Medium, 16 features (mixed)
+    'individual_household_electric_power_consumption': 235,  # Large, 7 features (time series data)
+}
+
+
+
 
 
 
@@ -203,117 +208,86 @@ def load_and_define_parameters(dataset):
     dataset_parameters = {
         'iris': {
             'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 24,
             'INPUT_LAYER_SIZE': 4,
             'OUTPUT_LAYER_SIZE': 3
         },
-        'mnist': {
-            'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 512,
-            'INPUT_LAYER_SIZE': 784,
-            'OUTPUT_LAYER_SIZE': 10
-        },
-        'adult': {
-            'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 128,
-            'INPUT_LAYER_SIZE': 108,
-            'OUTPUT_LAYER_SIZE': 2
-        },
         'wine': {
             'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 24,
             'INPUT_LAYER_SIZE': 13,
             'OUTPUT_LAYER_SIZE': 3
         },
-        'breast_cancer': {
+        'adult': {
             'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
-            'INPUT_LAYER_SIZE': 33,
+            'INPUT_LAYER_SIZE': 14,
+            'OUTPUT_LAYER_SIZE': 2
+        },
+        'breast_cancer_wisconsin_original': {
+            'problem_type': "classification",
+            'INPUT_LAYER_SIZE': 9,
             'OUTPUT_LAYER_SIZE': 2
         },
         'heart_disease': {
             'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 13,
             'OUTPUT_LAYER_SIZE': 2
         },
-        'thyroid_disease': {
+        'bank_marketing': {
             'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 64,
-            'INPUT_LAYER_SIZE': 54,
-            'OUTPUT_LAYER_SIZE': 3
-        },
-        'census_income': {
-            'problem_type': "classification",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 256,
-            'INPUT_LAYER_SIZE': 509,
+            'INPUT_LAYER_SIZE': 16,
             'OUTPUT_LAYER_SIZE': 2
         },
-        'california': {
-            'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 64,
-            'INPUT_LAYER_SIZE': 8,
-            'OUTPUT_LAYER_SIZE': 1
+        'dry_bean': {
+            'problem_type': "classification",
+            'INPUT_LAYER_SIZE': 16,
+            'OUTPUT_LAYER_SIZE': 7
         },
-        'diabetes': {
-            'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
-            'INPUT_LAYER_SIZE': 10,
-            'OUTPUT_LAYER_SIZE': 1
+        'optical_recognition_of_handwritten_digits': {
+            'problem_type': "classification",
+            'INPUT_LAYER_SIZE': 64,
+            'OUTPUT_LAYER_SIZE': 10
         },
         'auto_mpg': {
             'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 7,
             'OUTPUT_LAYER_SIZE': 1
         },
-        'concrete': {
+        'energy_efficiency': {
             'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
+            'INPUT_LAYER_SIZE': 8,
+            'OUTPUT_LAYER_SIZE': 1
+        },
+        'concrete_compressive_strength': {
+            'problem_type': "regression",
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
         },
         'abalone': {
             'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
             'INPUT_LAYER_SIZE': 8,
             'OUTPUT_LAYER_SIZE': 1
         },
-        'housing': {
+        'parkinsons_telemonitoring': {
             'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
-            'INPUT_LAYER_SIZE': 13,
+            'INPUT_LAYER_SIZE': 26,
             'OUTPUT_LAYER_SIZE': 1
         },
-        'energy_efficiency': {
+        'air_quality': {
             'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 32,
-            'INPUT_LAYER_SIZE': 8,
+            'INPUT_LAYER_SIZE': 15,
             'OUTPUT_LAYER_SIZE': 1
         },
-        'kin8nm': {
+        'bike_sharing': {
             'problem_type': "regression",
-            'MAX_LAYERS': 20,
-            'MAX_LAYER_SIZE': 64,
-            'INPUT_LAYER_SIZE': 8,
+            'INPUT_LAYER_SIZE': 16,
+            'OUTPUT_LAYER_SIZE': 1
+        },
+        'individual_household_electric_power_consumption': {
+            'problem_type': "regression",
+            'INPUT_LAYER_SIZE': 7,
             'OUTPUT_LAYER_SIZE': 1
         }
     }
+
 
     if dataset not in dataset_parameters:
         raise ValueError(f"Dataset '{dataset}' is not defined.")
@@ -321,10 +295,10 @@ def load_and_define_parameters(dataset):
     # Extract the parameters for the dataset
     params = dataset_parameters[dataset]
     problem_type = params['problem_type']
-    MAX_LAYERS = 20
-    MAX_LAYER_SIZE = 256
     INPUT_LAYER_SIZE = params['INPUT_LAYER_SIZE']
     OUTPUT_LAYER_SIZE = params['OUTPUT_LAYER_SIZE']
+    MAX_LAYERS = 20
+    MAX_LAYER_SIZE = 512
 
     # Define activation functions based on the problem type
     ACTIVATIONS = {1: 'relu', 2: 'sigmoid', 3: 'tanh', 4: 'linear'}
