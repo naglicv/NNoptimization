@@ -14,10 +14,10 @@ def load_and_preprocess_classification_data(dataset_name, dataset_id, device):
     X = data.data.features
     y = data.data.targets.squeeze()  # Ensure y is a Series by removing unnecessary dimensions
     
-    print(f"Dataset: {dataset_name}")
-    print(f"X shape: {X.shape}, y shape: {y.shape}")
-    print(f"Metadata:\n{data.metadata}")
-    print(f"Variables: {data.variables}")
+    # print(f"Dataset: {dataset_name}")
+    # print(f"X shape: {X.shape}, y shape: {y.shape}")
+    # print(f"Metadata:\n{data.metadata}")
+    # print(f"Variables: {data.variables}")
     
     # Handle dataset-specific preprocessing
     if dataset_id == 53:  # Iris dataset
