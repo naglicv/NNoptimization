@@ -25,8 +25,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 warnings.filterwarnings("ignore")
 
 
-DATASET_LIST = DATASET_LIST_CLASS
-# DATASET_LIST = DATASET_LIST_REG
+# DATASET_LIST = DATASET_LIST_CLASS
+DATASET_LIST = DATASET_LIST_REG
 # DATASET_LIST = DATASET_LIST_SMALL
 # DATASET_LIST = DATASET_LIST_LARGE
 
@@ -42,6 +42,7 @@ validation_history_avg = []
 validation_history_chosen = []
 
 best_fitness = -np.inf
+best_solution_ = None
 patience_counter = 0
 
 len_beg_params = len(BEG_PARAMS)
@@ -51,13 +52,14 @@ input_size, output_size = None, None
 
 def clear_variables(after_event):
     global fitness_history_best, fitness_history_avg, val_gen_dict, validation_history_best, validation_history_avg, validation_history_chosen
-    global best_fitness, patience_counter
+    global best_fitness, patience_counter, best_solution_
     
     if after_event == 'dataset':
         global X_train, y_train, X_val, y_val, X_test, y_test, input_size, output_size
         X_train, y_train, X_val, y_val, X_test, y_test = None, None, None, None, None, None
         input_size, output_size = None, None
         
+    best_solution_ = None
     fitness_history_best = []
     fitness_history_avg = []
     val_gen_dict = {}
@@ -66,6 +68,7 @@ def clear_variables(after_event):
     validation_history_chosen = []
     best_fitness = -np.inf
     patience_counter = 0
+    
         
     
 def average_dict_values(d):
@@ -81,7 +84,7 @@ def callback_generation(ga_instance):
     # Save the fitness score for the best and the average solution in each generation
     _, best_fitness_current, best_solution_idx = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
     fitness_history_best.append(best_fitness_current)
-    validation_history_chosen.append(val_gen_dict.get(best_solution_idx, None))
+    validation_history_chosen.append(val_gen_dict.get(best_solution_idx, validation_history_chosen[-1]))
     
     fitness_history_avg.append(np.mean(ga_instance.last_generation_fitness))
     val_avg = average_dict_values(val_gen_dict)
@@ -101,7 +104,7 @@ def callback_generation(ga_instance):
         patience_counter += 1
     
     # Early stopping check
-    if best_fitness > 1e8 or patience_counter >= patience_ga:
+    if patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
         ticks_generation.n = ticks_generation.total
         ticks_generation.last_print_n = ticks_generation.total
