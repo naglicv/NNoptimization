@@ -81,7 +81,7 @@ def callback_generation(ga_instance):
     # Save the fitness score for the best and the average solution in each generation
     _, best_fitness_current, best_solution_idx = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
     fitness_history_best.append(best_fitness_current)
-    validation_history_chosen.append(val_gen_dict[best_solution_idx])
+    validation_history_chosen.append(val_gen_dict.get(best_solution_idx, None))
     
     fitness_history_avg.append(np.mean(ga_instance.last_generation_fitness))
     val_avg = average_dict_values(val_gen_dict)
@@ -155,6 +155,7 @@ def generatePopulation(sol_per_pop):
 
 
 def fitness_func(ga_instance, solution, solution_idx):
+    global val_gen_dict
     # Create a neural network from the solution array
     solution_nn = array_to_nn(solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)
     
