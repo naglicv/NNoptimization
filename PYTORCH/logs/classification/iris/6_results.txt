@@ -1,0 +1,19 @@
+Train accuracy: 98.09523809523809
+Train loss: 0.06688674539327621
+Validation accuracy: 100.0
+Validation loss: 0.026082174852490425
+Test accuracy: 100.0
+Test loss: 0.017672477290034294
+Parameters of the best solution:	Learning rate: 0.0071300895585748965
+	Batch size: 128.0
+	Epochs: 34.0
+	Patience: 7.0
+	Number of layers: 3
+	Hidden layer sizes: [392. 215. 462.]
+	Activations: ['linear', 'sigmoid', 'tanh']
+	Dropout rates: [0.4530555  0.16074786 0.23821849]
+	Batch normalization: [0. 0. 0.]
+	Output activation: softmax
+Fitness value of the best solution: 34.45679976428385
+Index of the best solution: 0
+Elapsed time: 00:00:15
