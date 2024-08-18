@@ -81,7 +81,7 @@ def callback_generation(ga_instance):
     # Save the fitness score for the best and the average solution in each generation
     best_key, best_fitness_current, _ = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
     fitness_history_best.append(best_fitness_current)
-    validation_history_chosen.append(val_gen_dict[tuple(best_key)])
+    validation_history_chosen.append(val_gen_dict[tuple(best_key.tolist())])
     
     fitness_history_avg.append(np.mean(ga_instance.last_generation_fitness))
     val_avg = average_dict_values(val_gen_dict)
@@ -197,8 +197,8 @@ def fitness_func(ga_instance, solution, solution_idx):
         small_value = 1e-12
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
 
-        if tuple(solution) not in val_gen_dict:
-            val_gen_dict[tuple(solution)] = validation_loss
+        solution_list = solution.tolist()
+        val_gen_dict[tuple(solution_list)] = validation_loss
     return fitness_score
 
 
