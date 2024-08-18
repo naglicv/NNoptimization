@@ -1,25 +1,24 @@
-import os
 import gc
+import os
 import time
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
-import pygad
-from tqdm import tqdm
-import pandas as pd
 import torch
-import warnings
-from ucimlrepo import fetch_ucirepo 
-
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.datasets import load_iris, fetch_california_housing, load_diabetes, fetch_openml
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from nn2 import *
+from tqdm import tqdm
 
-# DATASET_LIST = DATASET_LIST_CLASS
+import pygad
+
+from data_processing import load_and_preprocess_classification_data
+from datasets import *
+from nn_converter import array_to_nn, BEG_PARAMS
+
+DATASET_LIST = DATASET_LIST_CLASS
 # DATASET_LIST = DATASET_LIST_REG
 # DATASET_LIST = DATASET_LIST_SMALL
-DATASET_LIST = DATASET_LIST_LARGE
+# DATASET_LIST = DATASET_LIST_LARGE
 
 # Check if CUDA (GPU support) is available
 if torch.cuda.is_available():
@@ -31,148 +30,23 @@ else:
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 warnings.filterwarnings("ignore")
-# tracemalloc.start()
 
 test_size = 0.3
 min_delta = 0.001  # Minimum change in fitness to qualify as an improvement
 patience_ga = 50  # Number of generations to wait before stopping if there is no improvement
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
 
-# fitness_scores = {}
 fitness_history_best = []
 fitness_history_avg = []
 best_fitness = -np.inf
 patience_counter = 0
-generation_counter = 1
+input_size = 0
+output_size = 0
 
-gen_num_printed = True
-
-# # Ensure the directory exists
-# log_dir = f"./logs/{problem_type}/{dataset}"
-# os.makedirs(log_dir, exist_ok=True)
-
-# Set up logging
-# logging.basicConfig(filename=f"{log_dir}/memory_usage.log", level=logging.INFO, format='%(asctime)s - %(message)s')
-
-# def log_memory_usage(message="Memory usage"):
-#     process = psutil.Process()
-#     memory_info = process.memory_info()
-#     logging.info(f"{message}: RSS={memory_info.rss / (1024 ** 2):.2f} MB, VMS={memory_info.vms / (1024 ** 2):.2f} MB")
-    
-#     # # Also log the tracemalloc stats
-#     # snapshot = tracemalloc.take_snapshot()
-#     # top_stats = snapshot.statistics('lineno')
-#     # logging.info(f"[ Top 10 memory-consuming lines for {message} ]")
-#     # for stat in top_stats[:10]:
-#     #     logging.info(stat)
-        
-"""
-Datasets Included
-
-Classification:
-1. Iris - Small, 4 features.
-   Description: A classic dataset for classifying iris plants based on petal and sepal measurements.
-2. Wine - Small, 13 features.
-   Description: Classify wine samples into three classes based on chemical analysis.
-3. Breast Cancer - Medium, 30 features (mixed).
-   Description: Binary classification for diagnosing breast cancer using various cell attributes.
-4. Heart Disease - Medium, 13 features (mixed).
-   Description: Predict the presence of heart disease using clinical and demographic data.
-5. Thyroid Disease - Medium, 21 features (mixed).
-   Description: Multi-class classification of thyroid conditions using medical data.
-6. Adult - Medium, 14 features.
-   Description: Predict income levels based on demographic attributes.
-7. Fashion-MNIST - Large, image data with 784 features.
-   Description: Classify clothing items based on grayscale images of 28x28 pixels.
-8. MNIST - Large, image data with 784 features.
-   Description: Handwritten digit classification task with 10 classes (digits 0-9).
-
-Regression:
-1. Auto MPG - Small, 7 features (mixed).
-   Description: Predict vehicle fuel efficiency (miles per gallon) based on car specifications.
-2. Energy Efficiency - Small, 8 features (mixed).
-   Description: Predict the energy efficiency of buildings in terms of heating and cooling loads based on structural attributes.
-3. Bike Sharing - Medium, 16 features.
-   Description: Predict the number of bike rentals based on environmental conditions and seasonal factors.
-4. Concrete - Medium, 8 features.
-   Description: Predict the compressive strength of concrete based on its composition and age.
-5. Abalone - Medium, 8 features.
-   Description: Predict the age of abalone from physical measurements such as shell diameter and weight.
-6. Kin8nm - Medium, 8 features (mixed).
-   Description: Predict the forward kinematics of an 8-link robot arm based on joint angles.
-7. Diabetes - Medium, 10 features.
-   Description: Predict the progression of diabetes one year after baseline using various clinical measurements.
-8. California Housing - Large, 8 features.
-   Description: Predict house prices in California districts based on demographic and geographic features.
-
-"""
-
-def load_and_preprocess_data(dataset_id):
-    # Fetch the dataset using the dataset ID
-    dataset = fetch_ucirepo(id=dataset_id)
-    
-    # Separate features and target variable
-    X = dataset.data.features  # X is a DataFrame
-    y = dataset.data.targets  # y can be a DataFrame or Series
-
-    # Check if y is None
-    if y is None:
-        raise ValueError("The target variable 'y' is None. Please check the dataset.")
-
-    # Convert categorical features to dummy/one-hot encoded variables
-    X = pd.get_dummies(X)  # Convert categorical features to one-hot encoded variables
-    
-    # Ensure all features are in float32 format
-    X = X.astype("float32")
-    
-    # Process the target variable depending on the problem type
-    if problem_type == "classification":
-        if (isinstance(y, pd.DataFrame) and any(y.dtypes == object)) or \
-        (isinstance(y, pd.Series) and y.dtype == object) or \
-        (y.dtypes.name == 'category'):
-            # Convert string labels to integers
-            le = LabelEncoder()
-            y = le.fit_transform(y)
-            
-        # Handle missing values (e.g., fill with -1) in classification target
-        y = np.where(np.isnan(y.astype(float)), -1, y)
-        y = y.astype("float32")  # Convert target to float32 for compatibility
-
-    elif problem_type == "regression":
-        # Ensure y is treated appropriately whether it's a Series or DataFrame
-        y = y.apply(pd.to_numeric, errors='coerce') if isinstance(y, pd.DataFrame) else pd.to_numeric(y, errors='coerce')
-        
-        # Handle missing values (e.g., fill with mean) in regression target
-        if y.isnull().any().any() if isinstance(y, pd.DataFrame) else y.isnull().any():
-            y = y.fillna(y.mean())
-
-        # Replace infinities with NaN and then fill them with mean
-        y = y.replace([np.inf, -np.inf], np.nan)
-        if y.isnull().any().any() if isinstance(y, pd.DataFrame) else y.isnull().any():
-            y = y.fillna(y.mean())
-
-        # Ensure that y is now a float32 numpy array
-        y = y.astype('float32')
-
-    # Normalize the features
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
-    
-    # Split the data into training, validation, and test sets
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
-    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
-
-    # Convert y_train, y_val, and y_test to tensors
-    y_train = torch.tensor(y_train.values if isinstance(y_train, pd.DataFrame) else y_train, dtype=torch.float32).to(device)
-    y_val = torch.tensor(y_val.values if isinstance(y_val, pd.DataFrame) else y_val, dtype=torch.float32).to(device)
-    y_test = torch.tensor(y_test.values if isinstance(y_test, pd.DataFrame) else y_test, dtype=torch.float32).to(device)
-
-    return X_train, y_train, X_val, y_val, X_test, y_test
-
-
+global X_train, y_train, X_val, y_val, X_test, y_test
 
 def callback_generation(ga_instance):
-    global best_fitness, patience_counter, min_delta, patience_ga, generation_counter, gen_num_printed, fitness_scores, ticks_generation
+    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, ticks_generation
     
     # Save the fitness score for the best and the average solution in each generation
     best_fitness_current = np.max(ga_instance.last_generation_fitness)
@@ -186,13 +60,10 @@ def callback_generation(ga_instance):
     else:
         patience_counter += 1
     
-    # Log memory usage after each generation
-    # log_memory_usage(f"After generation {ga_instance.generations_completed + 1}")
     # Early stopping check
     if patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
         ticks_generation.update(ticks_generation.total - ticks_generation.n)
-
         return "stop"
     
     ticks_generation.update(1)
@@ -234,10 +105,6 @@ def generatePopulation(sol_per_pop):
         # Append the solution to the population
         population.append(solution)
         
-        # # Free memory after each iteration
-        # del hidden_layer_sizes, activations, dropout_rates, batch_norms, solution
-        # gc.collect()
-    
     # Convert the list of solutions to a numpy array
     population = np.array(population)
     # print("\n——————————— GENERATION 0 ———————————\n")
@@ -246,10 +113,8 @@ def generatePopulation(sol_per_pop):
 
 
 def fitness_func(ga_instance, solution, solution_idx):
-    global gen_num_printed
-
     # Create a neural network from the solution array
-    solution_nn = array_to_nn(solution).to(device)
+    solution_nn = array_to_nn(solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)
     
     # Ensure X_train and y_train have matching first dimensions
     if X_train.shape[0] != y_train.shape[0]:
@@ -258,16 +123,9 @@ def fitness_func(ga_instance, solution, solution_idx):
     if X_test.shape[0] != y_test.shape[0]:
         raise ValueError(f"Mismatch in number of samples between X_test and y_test. X_test has {X_test.shape[0]} samples, but y_test has {y_test.shape[0]} samples.")
     
-    # Convert X_train, y_train, X_test, and y_test to tensors if they aren't already
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device) if not isinstance(X_train, torch.Tensor) else X_train
-    y_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device) if not isinstance(y_train, torch.Tensor) else y_train
-    
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32).to(device) if not isinstance(X_test, torch.Tensor) else X_test
-    y_test_tensor = torch.tensor(y_test, dtype=torch.float32).to(device) if not isinstance(y_test, torch.Tensor) else y_test
-
     # Create DataLoader for training and validation
-    train_loader = DataLoader(TensorDataset(X_train_tensor, y_train_tensor), batch_size=int(solution_nn.batch_size), shuffle=True)
-    val_loader = DataLoader(TensorDataset(X_test_tensor, y_test_tensor), batch_size=int(solution_nn.batch_size), shuffle=False)
+    train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=int(solution_nn.batch_size), shuffle=True)
+    val_loader = DataLoader(TensorDataset(X_val, y_val), batch_size=int(solution_nn.batch_size), shuffle=False)
 
     # Train the neural network
     solution_nn.train_model(train_loader, val_loader)
@@ -300,11 +158,8 @@ def fitness_func(ga_instance, solution, solution_idx):
     return fitness_score
 
 
-
 def custom_crossover(parents, offspring_size, ga_instance):
     # print("... Crossover ...")
-    # print("—> offspring size: ", offspring_size[0])
-    
     offspring = np.array([])
     for i in range(offspring_size[0]):
         # print(f"\n{i}:\n")
@@ -322,33 +177,34 @@ def custom_crossover(parents, offspring_size, ga_instance):
 
 
 def structured_crossover(parent1, parent2):
-    # Parameters of parent 1
-    learning_rate1 = float(parent1[0])
-    batch_size1 = int(parent1[1])
-    epochs1 = int(parent1[2])
-    patience1 = int(parent1[3])
-    num_layers1 = int(parent1[len(BEG_PARAMS)])
-    hidden_layer_sizes1 = parent1[len(BEG_PARAMS) + 1:num_layers1 + len(BEG_PARAMS) + 1].astype(np.int32)
-    activations1 = parent1[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers1 + len(BEG_PARAMS) + 1].astype(np.int32)
-    dropout_rates1 = parent1[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers1 + len(BEG_PARAMS) + 1]
-    batch_norms1 = parent1[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers1 + len(BEG_PARAMS) + 1].astype(np.int32)
     
-    # Parameters of parent 2
-    learning_rate2 = float(parent2[0])
-    batch_size2 = int(parent2[1])
-    epochs2 = int(parent2[2])
-    patience2 = int(parent2[3])
-    num_layers2 = int(parent2[len(BEG_PARAMS)])
-    hidden_layer_sizes2 = parent2[len(BEG_PARAMS) + 1:num_layers2 + len(BEG_PARAMS) + 1].astype(np.int32)
-    activations2 = parent2[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers2 + len(BEG_PARAMS) + 1].astype(np.int32)
-    dropout_rates2 = parent2[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers2 + len(BEG_PARAMS) + 1]
-    batch_norms2 = parent2[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers2 + len(BEG_PARAMS) + 1].astype(np.int32)
+    # Function to extract parent parameters
+    def extract_params(parent):
+        learning_rate = float(parent[0])
+        batch_size = int(parent[1])
+        epochs = int(parent[2])
+        patience = int(parent[3])
+        num_layers = int(parent[len(BEG_PARAMS)])
+        hidden_layer_sizes = parent[len(BEG_PARAMS) + 1:num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
+        activations = parent[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
+        dropout_rates = parent[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1]
+        batch_norms = parent[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
+        
+        return learning_rate, batch_size, epochs, patience, num_layers, hidden_layer_sizes, activations, dropout_rates, batch_norms
+    
+    # Extract parameters from both parents
+    params1 = extract_params(parent1)
+    params2 = extract_params(parent2)
     
     ## CROSSOVER ##
     cross_option = np.random.randint(1, 3)
     
     # OPTION 1: beginning of parent 1 + "connection layer" + end of parent 2
     if cross_option == 1:
+        # Unpack parameters for option 1
+        learning_rate1, batch_size1, epochs1, patience1, num_layers1, hidden_layer_sizes1, activations1, dropout_rates1, batch_norms1 = params1
+        learning_rate2, batch_size2, epochs2, patience2, num_layers2, hidden_layer_sizes2, activations2, dropout_rates2, batch_norms2 = params2
+        
         # print("Option 1")
         # Select crossover points
         parent1_point1 = parent1_point2 = parent2_point1 = parent2_point2 = -1
@@ -373,11 +229,6 @@ def structured_crossover(parent1, parent2):
         connection_activation = np.random.randint(1, len(ACTIVATIONS) + 1, (2,))
         connection_dropout = np.random.uniform(0.1, 0.5, (2,))
         connection_batch_norm = np.random.choice([0, 1], (2,))
-        
-        # print(f"——> parent 1:")
-        # print(f"    —> point 1: {parent1_point1}, point 2: {parent1_point2}")
-        # print(f"——> parent 2:")
-        # print(f"    —> point 1: {parent2_point1}, point 2: {parent2_point2}")
         
         # Perform crossover
         new_learning_rate1 = float(np.random.choice([learning_rate1, learning_rate2]))
@@ -408,14 +259,20 @@ def structured_crossover(parent1, parent2):
         new_batch_norms2 = np.concatenate((batch_norms2[:parent2_point2], [connection_batch_norm[1]], batch_norms1[parent1_point2:]))
     
         # Pad each part to MAX_LAYERS length
-        new_hidden_layer_sizes1 = np.append(new_hidden_layer_sizes1, [0] * (MAX_LAYERS - new_num_layers1))  # 0 indicates padding
-        new_hidden_layer_sizes2 = np.append(new_hidden_layer_sizes2, [0] * (MAX_LAYERS - new_num_layers2))
-        new_activations1 = np.append(new_activations1, [-1] * (MAX_LAYERS - new_num_layers1))               # -1 indicates padding
-        new_activations2 = np.append(new_activations2, [-1] * (MAX_LAYERS - new_num_layers2))
-        new_dropout_rates1 = np.append(new_dropout_rates1, [-1.0] * (MAX_LAYERS - new_num_layers1))         # -1 indicates padding
-        new_dropout_rates2 = np.append(new_dropout_rates2, [-1.0] * (MAX_LAYERS - new_num_layers2))
-        new_batch_norms1 = np.append(new_batch_norms1, [-1] * (MAX_LAYERS - new_num_layers1))               # -1 indicates padding
-        new_batch_norms2 = np.append(new_batch_norms2, [-1] * (MAX_LAYERS - new_num_layers2))
+        def pad_to_max_layers(array, num_layers, padding_value):
+            return np.pad(array, (0, MAX_LAYERS - num_layers), 'constant', constant_values=padding_value)
+        
+        new_hidden_layer_sizes1 = pad_to_max_layers(new_hidden_layer_sizes1, new_num_layers1, 0)
+        new_hidden_layer_sizes2 = pad_to_max_layers(new_hidden_layer_sizes2, new_num_layers2, 0)
+        
+        new_activations1 = pad_to_max_layers(new_activations1, new_num_layers1, -1)
+        new_activations2 = pad_to_max_layers(new_activations2, new_num_layers2, -1)
+        
+        new_dropout_rates1 = pad_to_max_layers(new_dropout_rates1, new_num_layers1, -1.0)
+        new_dropout_rates2 = pad_to_max_layers(new_dropout_rates2, new_num_layers2, -1.0)
+        
+        new_batch_norms1 = pad_to_max_layers(new_batch_norms1, new_num_layers1, -1)
+        new_batch_norms2 = pad_to_max_layers(new_batch_norms2, new_num_layers2, -1)
         
         offspring1 = np.concatenate((
             [new_learning_rate1, new_batch_size1, new_epochs1, new_patience1, new_num_layers1],
@@ -438,32 +295,14 @@ def structured_crossover(parent1, parent2):
     # OPTION 2: beginning of parent 1 + "connection layer" + middle of parent 2 + "connection layer" + end of parent 1
     elif cross_option == 2:
         # print("Option 2")
-        offspring1 = []
-        offspring2 = []
+        offspring1, offspring2 = None, None
         for i in range(2):
-            if i == 1:
-                # Parameters of parent 1
-                learning_rate2 = float(parent1[0])
-                batch_size2 = int(parent1[1])
-                epochs2 = int(parent1[2])
-                patience2 = int(parent1[3])
-                num_layers2 = int(parent1[len(BEG_PARAMS)])
-                hidden_layer_sizes2 = parent1[len(BEG_PARAMS) + 1:num_layers2 + len(BEG_PARAMS) + 1].astype(np.int32)
-                activations2 = parent1[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers2 + len(BEG_PARAMS) + 1].astype(np.int32)
-                dropout_rates2 = parent1[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers2 + len(BEG_PARAMS) + 1]
-                batch_norms2 = parent1[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers2 + len(BEG_PARAMS) + 1].astype(np.int32)
-                
-                # Parameters of parent 2
-                learning_rate1 = float(parent2[0])
-                batch_size1 = int(parent2[1])
-                epochs1 = int(parent2[2])
-                patience1 = int(parent2[3])
-                num_layers1 = int(parent2[len(BEG_PARAMS)])
-                hidden_layer_sizes1 = parent2[len(BEG_PARAMS) + 1:num_layers1 + len(BEG_PARAMS) + 1].astype(np.int32)
-                activations1 = parent2[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers1 + len(BEG_PARAMS) + 1].astype(np.int32)
-                dropout_rates1 = parent2[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers1 + len(BEG_PARAMS) + 1]
-                batch_norms1 = parent2[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers1 + len(BEG_PARAMS) + 1].astype(np.int32)
-                
+            params = params1 if i == 0 else params2
+            reverse_params = params2 if i == 0 else params1
+
+            learning_rate1, batch_size1, epochs1, patience1, num_layers1, hidden_layer_sizes1, activations1, dropout_rates1, batch_norms1 = params
+            learning_rate2, batch_size2, epochs2, patience2, num_layers2, hidden_layer_sizes2, activations2, dropout_rates2, batch_norms2 = reverse_params
+            
             # Generate connection layer parameters
             connection_layer_size = np.random.randint(1, MAX_LAYER_SIZE + 1, (2,))
             connection_activation = np.random.randint(1, len(ACTIVATIONS) + 1, (2,))
@@ -488,7 +327,6 @@ def structured_crossover(parent1, parent2):
                     part1_size = parent1_point11 + (num_layers1 - parent1_point12)
             
             part2_max_size = MAX_LAYERS - part1_size - 2
-            # part2_size = np.random.randint(1, min(part2_max_size))
             if num_layers2 == 1:
                 # If parent 2 has only one layer, we place the layer in the middle
                 parent2_point11 = 0
@@ -560,8 +398,6 @@ def structured_crossover(parent1, parent2):
 
 
 def custom_mutation(offspring, ga_instance):
-    # print("... Mutation ...")
-    # print("—————————————————————> MUTATION\n")
     for i in range(len(offspring)):
         offspring[i] = structured_mutation(offspring[i])
     return np.array(offspring)
@@ -663,8 +499,9 @@ def save_results_to_file(filename, content):
     with open(filename, 'w') as file:
         file.write(content)
 
+
 def print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_generations, num_parents_mating, K_tournaments, keep_parents):
-    #global test_size, min_delta, patience_ga, penalty_mult_list, penalty_mult
+    
     params_content = (
         f"Genetic Algorithm Parameters:\n"
         f"Population Size: {sol_per_pop}\n"
@@ -680,7 +517,9 @@ def print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_gener
         f"Penalty Multipliers: {penalty_mult_list}\n"
         f"Current Penalty Multiplier: {penalty_mult}\n"
     )
+    
     save_results_to_file(f"{output_dir}/{ga_index+1}_parameters.txt", params_content)
+
 
 def geneticAlgorithm(ga_index):
     global parent_selection_type, ticks_generation
@@ -726,6 +565,7 @@ def geneticAlgorithm(ga_index):
     # Run the genetic algorithm
     ga_instance.run()
     ticks_generation.close()
+    
     # Free memory used by the initial population
     del population
     gc.collect()  # Force garbage collection to free memory
@@ -737,56 +577,47 @@ def geneticAlgorithm(ga_index):
 
 if __name__ == '__main__':
     # for dataset in DATASET_LIST:
-    #     print("Dataset: ", dataset)
-    #     problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
-    #     print("Problem type: ", problem_type)
-    #     print("Max layers: ", MAX_LAYERS)
-    #     print("Max layer size: ", MAX_LAYER_SIZE)
-    #     print("Input layer size: ", INPUT_LAYER_SIZE)
-    #     print("Output layer size: ", OUTPUT_LAYER_SIZE)
-    #     print("Activations: ", ACTIVATIONS)
-    #     print("Output activations: ", ACTIVATIONS_OUTPUT)
-    #     print("\n")
+    #     # print("Dataset: ", dataset)
+    #     problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
+    #     # print("Problem type: ", problem_type)
+    #     # print("Max layers: ", MAX_LAYERS)
+    #     # print("Max layer size: ", MAX_LAYER_SIZE)
+    #     # print("Input layer size: ", INPUT_LAYER_SIZE)
+    #     # print("Output layer size: ", OUTPUT_LAYER_SIZE)
+    #     # print("Activations: ", ACTIVATIONS)
+    #     # print("Output activations: ", ACTIVATIONS_OUTPUT)
+    #     # print("\n")
     #     dataset_id = DATASET_LIST[dataset]
-    #     X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_id=dataset_id)
-    #     print("X_train shape: ", X_train.shape)
-    #     print("y_train shape: ", y_train.shape)
-    #     print("X_val shape: ", X_val.shape)
-    #     print("y_val shape: ", y_val.shape)
-    #     print("X_test shape: ", X_test.shape)
-    #     print("y_test shape: ", y_test.shape)
-    #     print("\n")
-    #     print("————————————————————————————————————————————————————————————")
+    #     X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
+    #     # print("X_train shape: ", X_train.shape)
+    #     # print("y_train shape: ", y_train.shape)
+    #     # print("X_val shape: ", X_val.shape)
+    #     # print("y_val shape: ", y_val.shape)
+    #     # print("X_test shape: ", X_test.shape)
+    #     # print("y_test shape: ", y_test.shape)
+    #     # print("\n")
         
+    #     # print("————————————————————————————————————————————————————————————")
     
-    # num_datasets = len(DATASET_LIST)
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
     
     for dataset_i, dataset in enumerate(DATASET_LIST): 
+        # if dataset_i in [0, 1, 2]:
+        #     continue
         dataset_id = DATASET_LIST[dataset]
         
         ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)
         
-        # print(f"————————————————————————————————————————————————————————————")
-        # print(f"dataset: {dataset}, index: {dataset_i}")
-        # print(f"————————————————————————————————————————————————————————————")
-        
         # Load the parameters for the selected dataset
-        problem_type, MAX_LAYERS, MAX_LAYER_SIZE, INPUT_LAYER_SIZE, OUTPUT_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
+        problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
         
         # Set up the output directory
         output_dir = f"./logs/{problem_type}/{dataset}/"
         os.makedirs(output_dir, exist_ok=True)
 
         # Load and preprocess the dataset
-        X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_id=dataset_id)
-
+        input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset, dataset_id=dataset_id, device=device)
         for i, penalty_mult in enumerate(penalty_mult_list):
-            # print(f"——————————————————————————————————————————")
-            # print(f"penalty_mult: {penalty_mult}")
-            # print(f"——————————————————————————————————————————")
-            # if dataset_i == 0 and i == 0:
-            #     continue
             start = time.time()
             
             # Run the genetic algorithm for this penalty multiplier
@@ -805,19 +636,19 @@ if __name__ == '__main__':
             best_solution = solution
             
             # Convert the best solution to a neural network using the array_to_nn function
-            nn2 = array_to_nn(best_solution).to(device)  # Move the model to the GPU
+            nn2 = array_to_nn(best_solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)  # Move the model to the GPU
 
             # Create DataLoader for training and validation
             train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=int(nn2.batch_size), shuffle=True)
             val_loader = DataLoader(TensorDataset(X_val, y_val), batch_size=int(nn2.batch_size), shuffle=False)
-
+            test_loader = DataLoader(TensorDataset(X_test, y_test), batch_size=int(nn2.batch_size), shuffle=False)
+            
             # Train the neural network
             nn2.train_model(train_loader, val_loader)
 
             # Evaluate the model on training, validation, and test data
             train_loss, train_accuracy = nn2.evaluate(train_loader)
             validation_loss, validation_accuracy = nn2.evaluate(val_loader)
-            test_loader = DataLoader(TensorDataset(X_test, y_test), batch_size=int(nn2.batch_size), shuffle=False)
             test_loss, test_accuracy = nn2.evaluate(test_loader)
             
             # Save the results to a file
