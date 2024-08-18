@@ -25,8 +25,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 warnings.filterwarnings("ignore")
 
 
-# DATASET_LIST = DATASET_LIST_CLASS
-DATASET_LIST = DATASET_LIST_REG
+DATASET_LIST = DATASET_LIST_CLASS
+# DATASET_LIST = DATASET_LIST_REG
 # DATASET_LIST = DATASET_LIST_SMALL
 # DATASET_LIST = DATASET_LIST_LARGE
 
@@ -40,6 +40,7 @@ val_gen_dict = {}
 validation_history_best = []
 validation_history_avg = []
 validation_history_chosen = []
+last_best_validation = np.inf
 
 best_fitness = -np.inf
 best_solution_ = None
@@ -52,7 +53,7 @@ input_size, output_size = None, None
 
 def clear_variables(after_event):
     global fitness_history_best, fitness_history_avg, val_gen_dict, validation_history_best, validation_history_avg, validation_history_chosen
-    global best_fitness, patience_counter, best_solution_
+    global best_fitness, patience_counter, best_solution_, last_best_validation
     
     if after_event == 'dataset':
         global X_train, y_train, X_val, y_val, X_test, y_test, input_size, output_size
@@ -68,30 +69,39 @@ def clear_variables(after_event):
     validation_history_chosen = []
     best_fitness = -np.inf
     patience_counter = 0
-    
+    last_best_validation = np.inf
         
     
 def average_dict_values(d):
     return sum(d.values()) / len(d) if d else 0
 
-def max_dict_value(d):
-    return max(d.values()) if d else None
+def min_dict_value(d):
+    return min(d.values()) if d else None
 
 
 def callback_generation(ga_instance):
     global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, best_solution_, ticks_generation, val_gen_dict
     
     # Save the fitness score for the best and the average solution in each generation
-    _, best_fitness_current, best_solution_idx = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
+    best_sol, best_fitness_current, _ = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
+    # print(f"best_fitness_current: {best_fitness_current}")
+    # print(f"best_solution_idx: {best_solution_idx}")
+    # print(f"best_solution_: {best_solution_}")
+    # print(f"ga_instance.generations_completed: {ga_instance.generations_completed}")
+    # print(f"ga_instance.population: {ga_instance.population}")
+    # print(f"ga_instance.last_generation_fitness: {ga_instance.last_generation_fitness}")
+    # print(f"ga_instance.best_solutions_fitness: {ga_instance.best_solutions_fitness}")
+    # print(f"ga_instance.best_solutions: {ga_instance.best_solutions}")
+    # print(f"ga_instance.best_solutions_indices: {ga_instance.best_solutions_indices}")
     fitness_history_best.append(best_fitness_current)
-    validation_history_chosen.append(val_gen_dict.get(best_solution_idx, validation_history_chosen[-1]))
+    validation_history_chosen.append(val_gen_dict.get(tuple(best_sol.tolist()), None))
     
     fitness_history_avg.append(np.mean(ga_instance.last_generation_fitness))
     val_avg = average_dict_values(val_gen_dict)
     validation_history_avg.append(val_avg)
     
-    val_max = max_dict_value(val_gen_dict)
-    validation_history_best.append(val_max)
+    val_min = min_dict_value(val_gen_dict)
+    validation_history_best.append(val_min)
 
     val_gen_dict = {}
     
@@ -178,6 +188,7 @@ def fitness_func(ga_instance, solution, solution_idx):
 
     # Evaluate the model on the validation set
     validation_loss, validation_accuracy = solution_nn.evaluate(val_loader)
+    val_gen_dict[tuple(solution.tolist())] = validation_loss
 
     # Check if validation_loss is NaN
     if torch.isnan(torch.tensor(validation_loss)):
@@ -201,7 +212,6 @@ def fitness_func(ga_instance, solution, solution_idx):
         small_value = 1e-12
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
         # print(f"in fitness_func: {tuple(solution)}")
-        val_gen_dict[solution_idx] = validation_loss
     return fitness_score
 
 
@@ -721,7 +731,8 @@ if __name__ == '__main__':
             )
             save_results_to_file(f"{output_dir}/{i+1}_results.txt", results_content)
             
-            # Save fitness history per generation
+            validation_history_chosen = [validation_history_chosen[i] for i in range(len(validation_history_chosen)) if validation_history_chosen[i] is not None else validation_history_chosen[i-1]]
+            # Save fitness and validation history per generation
             fitness_history_content = "Generation,Max Fitness,Chosen Individual Loss,Avg Fitness,Avg Loss,Best Loss\n"
             for gen in range(len(fitness_history_best)):
                 fitness_history_content += f"{gen + 1},{fitness_history_best[gen]},{validation_history_chosen[gen]},{fitness_history_avg[gen]},{validation_history_avg[gen]},{validation_history_best[gen]}\n"
