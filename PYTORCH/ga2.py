@@ -26,28 +26,29 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 warnings.filterwarnings("ignore")
 
 
-DATASET_LIST = DATASET_LIST_CLASS
-# DATASET_LIST = DATASET_LIST_REG
+# DATASET_LIST = DATASET_LIST_CLASS
+DATASET_LIST = DATASET_LIST_REG
 # DATASET_LIST = DATASET_LIST_SMALL
 # DATASET_LIST = DATASET_LIST_LARGE
 
-test_size = 0.3
 min_delta = 0  # Minimum change in fitness to qualify as an improvement
 patience_ga = 30  # Number of generations to wait before stopping if there is no improvement
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]  # Penalty multiplier for the complexity of the network
 
 fitness_history_best = []
 fitness_history_avg = []
+min_validation_loss = []
+chosen_validation_loss = []
+
 best_fitness = -np.inf
 patience_counter = 0
-input_size = 0
-output_size = 0
-best_solution_ = [None, None, None]
 
-global X_train, y_train, X_val, y_val, X_test, y_test
+len_beg_params = len(BEG_PARAMS)
+
+global X_train, y_train, X_val, y_val, X_test, y_test, best_solution_, input_size, output_size
 
 def callback_generation(ga_instance):
-    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, ticks_generation, best_solution_
+    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, best_solution_, ticks_generation
     
     # Save the fitness score for the best and the average solution in each generation
     best_fitness_current = np.max(ga_instance.last_generation_fitness)
@@ -63,15 +64,17 @@ def callback_generation(ga_instance):
         patience_counter += 1
     
     # Early stopping check
-    if best_fitness > 1e10 or patience_counter >= patience_ga:
+    if best_fitness > 1e8 or patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
-        ticks_generation.update(ticks_generation.total - ticks_generation.n)
+        ticks_generation.n = ticks_generation.total
+        ticks_generation.last_print_n = ticks_generation.total
         return "stop"
     
-    ticks_generation.update(1)
+    ticks_generation.update()
     # print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
 def generatePopulation(sol_per_pop):
+    
     population = []
     
     for _ in range(sol_per_pop):
@@ -179,18 +182,17 @@ def custom_crossover(parents, offspring_size, ga_instance):
 
 
 def structured_crossover(parent1, parent2):
-    
     # Function to extract parent parameters
     def extract_params(parent):
         learning_rate = float(parent[0])
         batch_size = int(parent[1])
         epochs = int(parent[2])
         patience = int(parent[3])
-        num_layers = int(parent[len(BEG_PARAMS)])
-        hidden_layer_sizes = parent[len(BEG_PARAMS) + 1:num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
-        activations = parent[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
-        dropout_rates = parent[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1]
-        batch_norms = parent[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
+        num_layers = int(parent[len_beg_params])
+        hidden_layer_sizes = parent[len_beg_params + 1:num_layers + len_beg_params + 1].astype(np.int32)
+        activations = parent[MAX_LAYERS + len_beg_params + 1:MAX_LAYERS + num_layers + len_beg_params + 1].astype(np.int32)
+        dropout_rates = parent[2 * MAX_LAYERS + len_beg_params + 1:2 * MAX_LAYERS + num_layers + len_beg_params + 1]
+        batch_norms = parent[3 * MAX_LAYERS + len_beg_params + 1:3 * MAX_LAYERS + num_layers + len_beg_params + 1].astype(np.int32)
         
         return learning_rate, batch_size, epochs, patience, num_layers, hidden_layer_sizes, activations, dropout_rates, batch_norms
     
@@ -413,11 +415,11 @@ def structured_mutation(individual):
     batch_size = int(individual[1])
     epochs = int(individual[2])
     patience = int(individual[3])
-    num_layers = int(individual[len(BEG_PARAMS)])
-    hidden_layer_sizes = individual[len(BEG_PARAMS) + 1:num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
-    activations = individual[MAX_LAYERS + len(BEG_PARAMS) + 1:MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
-    dropout_rates = individual[2 * MAX_LAYERS + len(BEG_PARAMS) + 1:2 * MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1]
-    batch_norms = individual[3 * MAX_LAYERS + len(BEG_PARAMS) + 1:3 * MAX_LAYERS + num_layers + len(BEG_PARAMS) + 1].astype(np.int32)
+    num_layers = int(individual[len_beg_params])
+    hidden_layer_sizes = individual[len_beg_params + 1:num_layers + len_beg_params + 1].astype(np.int32)
+    activations = individual[MAX_LAYERS + len_beg_params + 1:MAX_LAYERS + num_layers + len_beg_params + 1].astype(np.int32)
+    dropout_rates = individual[2 * MAX_LAYERS + len_beg_params + 1:2 * MAX_LAYERS + num_layers + len_beg_params + 1]
+    batch_norms = individual[3 * MAX_LAYERS + len_beg_params + 1:3 * MAX_LAYERS + num_layers + len_beg_params + 1].astype(np.int32)
     activation_output = individual[-1]
     
     # Mutate number of layers
@@ -513,7 +515,9 @@ def print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_gener
         f"Number of Parents Kept: {keep_parents}\n\n"
         
         f"Global Variables:\n"
-        f"Test Size: {test_size}\n"
+        f"Train Size: {0.7}\n"
+        f"Validation Size: {0.15}\n"
+        f"Test Size: {0.15}\n"
         f"Min Delta: {min_delta}\n"
         f"Patience for GA: {patience_ga}\n"
         f"Penalty Multipliers: {penalty_mult_list}\n"
@@ -569,7 +573,7 @@ def geneticAlgorithm(ga_index):
     ticks_generation.close()
     
     # Free memory used by the initial population
-    del population
+    del population, ticks_generation
     gc.collect()  # Force garbage collection to free memory
         
     # Plot the fitness history
@@ -578,15 +582,18 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    for i, dataset in enumerate(DATASET_LIST):
-        if i < 0:
-            continue
-        problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
-        load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
-        dataset_id = DATASET_LIST[dataset]
-        # X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
-        input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
-        # print("————————————————————————————————————————————————————————————")
+    # for i, dataset in enumerate(DATASET_LIST):
+    #     if i < 7:
+    #         continue
+    #     print(f"—————————————————————————————————")
+    #     print(f"Dataset: {dataset}")
+    #     print(f"—————————————————————————————————")
+    #     problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
+    #     load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
+    #     dataset_id = DATASET_LIST[dataset]
+    #     # X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
+    #     input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
+    #     # print("————————————————————————————————————————————————————————————")
     
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
     
@@ -609,13 +616,16 @@ if __name__ == '__main__':
         # Load and preprocess the dataset
         input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset, dataset_id=dataset_id, device=device)
         for i, penalty_mult in enumerate(penalty_mult_list):
+            if i < 1:
+                ticks_penalty.update(1)
+                continue
             start = time.time()
             
             # Run the genetic algorithm for this penalty multiplier
             ga_instance = geneticAlgorithm(i)
             
             # Save the GA instance
-            filename = f'{output_dir}genetic{i}'
+            filename = f'{output_dir}genetic{i+1}'
             ga_instance.save(filename=filename)
             
             # Calculate and format the elapsed time
@@ -642,7 +652,7 @@ if __name__ == '__main__':
             test_loss, test_accuracy = nn2.evaluate(test_loader)
             
             # Save the results to a file
-            nl = int(best_fitness[4])
+            nl = int(best_solution[len_beg_params])
             act = [ACTIVATIONS[int(a)] for a in best_solution[5+MAX_LAYERS:5+MAX_LAYERS+nl]]
             act_out = ACTIVATIONS_OUTPUT[int(best_solution[-1])]
             results_content = (
@@ -652,7 +662,7 @@ if __name__ == '__main__':
                 f"Validation loss: {validation_loss}\n"
                 f"Test accuracy: {test_accuracy}\n"
                 f"Test loss: {test_loss}\n"
-                f"Parameters of the best solution:"
+                f"Parameters of the best solution:\n"
                 f"\tLearning rate: {best_solution[0]}\n"
                 f"\tBatch size: {best_solution[1]}\n"
                 f"\tEpochs: {best_solution[2]}\n"
@@ -690,7 +700,9 @@ if __name__ == '__main__':
             del ga_instance
             torch.cuda.empty_cache()  # Clear GPU memory cache  
             
-            ticks_penalty.update(1)
+            ticks_penalty.update()
         ticks_penalty.close()
-        ticks_dataset.update(1)
-    ticks_dataset.close()   
+        del ticks_penalty
+        ticks_dataset.update()
+    ticks_dataset.close()
+    del ticks_dataset
