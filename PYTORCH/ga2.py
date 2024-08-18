@@ -1,9 +1,12 @@
 import gc
 from json import load
 import os
+import re
 import time
+from turtle import color
 import warnings
 
+from matplotlib import lines
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -26,8 +29,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 warnings.filterwarnings("ignore")
 
 
-# DATASET_LIST = DATASET_LIST_CLASS
-DATASET_LIST = DATASET_LIST_REG
+DATASET_LIST = DATASET_LIST_CLASS
+# DATASET_LIST = DATASET_LIST_REG
 # DATASET_LIST = DATASET_LIST_SMALL
 # DATASET_LIST = DATASET_LIST_LARGE
 
@@ -37,24 +40,62 @@ penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]  # Penalty multiplier
 
 fitness_history_best = []
 fitness_history_avg = []
-min_validation_loss = []
-chosen_validation_loss = []
+val_gen_dict = {}
+validation_history_best = []
+validation_history_avg = []
+validation_history_chosen = []
 
 best_fitness = -np.inf
 patience_counter = 0
 
 len_beg_params = len(BEG_PARAMS)
 
-global X_train, y_train, X_val, y_val, X_test, y_test, best_solution_, input_size, output_size
+X_train, y_train, X_val, y_val, X_test, y_test = None, None, None, None, None, None
+input_size, output_size = None, None
+
+def clear_variables(after_event):
+    global fitness_history_best, fitness_history_avg, val_gen_dict, validation_history_best, validation_history_avg, validation_history_chosen
+    global best_fitness, patience_counter
+    
+    if after_event == 'dataset':
+        global X_train, y_train, X_val, y_val, X_test, y_test, input_size, output_size
+        X_train, y_train, X_val, y_val, X_test, y_test = None, None, None, None, None, None
+        input_size, output_size = None, None
+        
+    fitness_history_best = []
+    fitness_history_avg = []
+    val_gen_dict = {}
+    validation_history_best = []
+    validation_history_avg = []
+    validation_history_chosen = []
+    best_fitness = -np.inf
+    patience_counter = 0
+        
+    
+def average_dict_values(d):
+    return sum(d.values()) / len(d) if d else 0
+
+def max_dict_value(d):
+    return max(d.values()) if d else None
+
 
 def callback_generation(ga_instance):
-    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, best_solution_, ticks_generation
+    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, best_solution_, ticks_generation, val_gen_dict
     
     # Save the fitness score for the best and the average solution in each generation
-    best_fitness_current = np.max(ga_instance.last_generation_fitness)
+    best_key, best_fitness_current, _ = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
     fitness_history_best.append(best_fitness_current)
+    validation_history_chosen.append(val_gen_dict[tuple(best_key)])
+    
     fitness_history_avg.append(np.mean(ga_instance.last_generation_fitness))
+    val_avg = average_dict_values(val_gen_dict)
+    validation_history_avg.append(val_avg)
+    
+    val_max = max_dict_value(val_gen_dict)
+    validation_history_best.append(val_max)
 
+    val_gen_dict = {}
+    
     # Early stopping logic
     if best_fitness_current - best_fitness > min_delta:
         patience_counter = 0
@@ -73,8 +114,8 @@ def callback_generation(ga_instance):
     ticks_generation.update()
     # print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
+
 def generatePopulation(sol_per_pop):
-    
     population = []
     
     for _ in range(sol_per_pop):
@@ -160,6 +201,8 @@ def fitness_func(ga_instance, solution, solution_idx):
         small_value = 1e-12
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
 
+        if tuple(solution) not in val_gen_dict:
+            val_gen_dict[tuple(solution)] = tuple(validation_loss)
     return fitness_score
 
 
@@ -616,9 +659,9 @@ if __name__ == '__main__':
         # Load and preprocess the dataset
         input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset, dataset_id=dataset_id, device=device)
         for i, penalty_mult in enumerate(penalty_mult_list):
-            if i < 1:
-                ticks_penalty.update(1)
-                continue
+            # if i < 1:
+            #     ticks_penalty.update(1)
+            #     continue
             start = time.time()
             
             # Run the genetic algorithm for this penalty multiplier
@@ -680,29 +723,44 @@ if __name__ == '__main__':
             save_results_to_file(f"{output_dir}/{i+1}_results.txt", results_content)
             
             # Save fitness history per generation
-            fitness_history_content = "Generation,Max Fitness,Avg Fitness\n"
+            fitness_history_content = "Generation,Max Fitness,Chosen Individual Loss,Avg Fitness,Avg Loss,Best Loss\n"
             for gen in range(len(fitness_history_best)):
-                fitness_history_content += f"{gen + 1},{fitness_history_best[gen]},{fitness_history_avg[gen]}\n"
+                fitness_history_content += f"{gen + 1},{fitness_history_best[gen]},{validation_history_chosen[gen]},{fitness_history_avg[gen]},{validation_history_avg[gen]},{validation_history_best[gen]}\n"
             save_results_to_file(f"{output_dir}/{i+1}_fitness_history.csv", fitness_history_content)
 
             # Save fitness history plots
-            plt.figure()
-            plt.plot(fitness_history_best, label='Best Fitness')
-            plt.plot(fitness_history_avg, label='Average Fitness')
-            plt.legend()
-            plt.title('Fitness per Generation')
+            fig = plt.figure(figsize=(12, 6))
+            fig.suptitle(f"Fitness per Generation")
+            plt.plot(fitness_history_best, label='Best Fitness', color='orange')
+            plt.plot(fitness_history_avg, '--', label='Average Fitness', color='blue')
+            plt.legend()         
+            plt.title(f'Dataset: {dataset}, Penalty Multiplier: {penalty_mult}')
             plt.xlabel('Generation')
             plt.ylabel('Fitness')
             plt.savefig(f"{output_dir}/{i+1}_fitness_plot.jpg")
             plt.close()
+
+            # Save validation loss history plots
+            fig = plt.figure(figsize=(12, 6))
+            fig.suptitle(f"Validation Loss per Generation")
+            plt.plot(validation_history_chosen, label='Validation Loss of Best Individual', color='#ff7f00')
+            plt.plot(validation_history_avg, '--', label='Average Validation Loss', color='#377eb8')
+            plt.plot(validation_history_best, '--', label='Lowest Validation Loss', color='#4daf4a')
+            plt.legend()
+            plt.title(f'Dataset: {dataset}, Penalty Multiplier: {penalty_mult}')
+            plt.xlabel('Generation')
+            plt.ylabel('Validation Loss')
+            plt.savefig(f"{output_dir}/{i+1}_validation_plot.jpg")
+            plt.close()
             
+            # Reset the variables for the next penalty multiplier
+            clear_variables(after_event='penalty')
             # Clear the GA instance to free up memory
             del ga_instance
             torch.cuda.empty_cache()  # Clear GPU memory cache  
             
             ticks_penalty.update()
         ticks_penalty.close()
-        del ticks_penalty
         ticks_dataset.update()
+        clear_variables(after_event='dataset')
     ticks_dataset.close()
-    del ticks_dataset

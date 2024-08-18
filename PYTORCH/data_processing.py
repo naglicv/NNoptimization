@@ -124,20 +124,16 @@ def load_and_preprocess_regression_data(dataset_name, dataset_id, device):
     X = data.data.features
     y = data.data.targets
 
-    # # Check if y is loaded correctly
-    # if y is None:
-    #     raise ValueError("Target data (y) is None. Ensure that the target columns are correctly loaded from the dataset.")
-    
     # For multiple target columns, ensure y is a DataFrame and doesn't need squeezing
     if isinstance(y, pd.DataFrame):
         y = y  # Keep as DataFrame if there are multiple targets
     else:
         y = y.squeeze()  # Squeeze if it's a single target column
 
-    print(f"Dataset: {dataset_name}")
-    print(f"X shape: {X.shape}, y shape: {y.shape}")
-    print(f"Metadata:\n{data.metadata}")
-    print(f"Variables: {data.variables}")
+    # print(f"Dataset: {dataset_name}")
+    # print(f"X shape: {X.shape}, y shape: {y.shape}")
+    # print(f"Metadata:\n{data.metadata}")
+    # print(f"Variables: {data.variables}")
     
     # Handle dataset-specific preprocessing
     if dataset_id == 9:  # Auto MPG dataset
