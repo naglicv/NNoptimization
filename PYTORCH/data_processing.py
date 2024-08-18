@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from ucimlrepo import fetch_ucirepo  # assuming this is a custom function for fetching UCI datasets
+from ucimlrepo import fetch_ucirepo  # UCI datasets
 
 def load_and_preprocess_classification_data(dataset_name, dataset_id, device):
     # Fetch the dataset using the given ID
@@ -14,10 +14,10 @@ def load_and_preprocess_classification_data(dataset_name, dataset_id, device):
     X = data.data.features
     y = data.data.targets.squeeze()  # Ensure y is a Series by removing unnecessary dimensions
     
-    # print(f"Dataset: {dataset_name}")
-    # print(f"X shape: {X.shape}, y shape: {y.shape}")
-    # print(f"Metadata:\n{data.metadata}")
-    # print(f"Variables: {data.variables}")
+    print(f"Dataset: {dataset_name}")
+    print(f"X shape: {X.shape}, y shape: {y.shape}")
+    print(f"Metadata:\n{data.metadata}")
+    print(f"Variables: {data.variables}")
     
     # Handle dataset-specific preprocessing
     if dataset_id == 53:  # Iris dataset
@@ -101,8 +101,49 @@ def load_and_preprocess_classification_data(dataset_name, dataset_id, device):
     X_train, X_temp, y_train, y_temp = train_test_split(X_tensor, y_tensor, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
     
+    X_train = X_train.to(device)
+    y_train = y_train.to(device)
+    X_val = X_val.to(device)
+    y_val = y_val.to(device)
+    X_test = X_test.to(device)
+    y_test = y_test.to(device)
+    
     # Determine input and output sizes
     input_size = X_train.shape[1]
     output_size = len(torch.unique(y_train))
+
+    return input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test
+
+
+def load_and_preprocess_regression_data(dataset_name, dataset_id, device):
+    # Fetch the dataset using the given ID
+    data = fetch_ucirepo(id=dataset_id)
+    
+    # Extract features and labels
+    X = data.data.features
+    y = data.data.targets.squeeze()  # Ensure y is a 1D array by removing unnecessary dimensions
+    
+    print(f"Dataset: {dataset_name}")
+    print(f"X shape: {X.shape}, y shape: {y.shape}")
+    print(f"Metadata:\n{data.metadata}")
+    print(f"Variables: {data.variables}")
+    
+    # Handle dataset-specific preprocessing
+    if dataset_id == 1: 
+        pass
+    else:
+        raise ValueError("Dataset ID not recognized. Please update the function to handle this dataset.")
+    
+    # Convert to PyTorch tensors
+    X_tensor = torch.tensor(X_scaled, dtype=torch.float32).to(device)
+    y_tensor = torch.tensor(y, dtype=torch.float32).to(device)
+    
+    # Split the data into training, validation, and test sets
+    X_train, X_temp, y_train, y_temp = train_test_split(X_tensor, y_tensor, test_size=0.3, random_state=42)
+    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+    
+    # Determine input size
+    input_size = X_train.shape[1]
+    output_size = 1
 
     return input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test

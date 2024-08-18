@@ -1,4 +1,5 @@
 import gc
+from json import load
 import os
 import time
 import warnings
@@ -11,7 +12,7 @@ from tqdm import tqdm
 
 import pygad
 
-from data_processing import load_and_preprocess_classification_data
+from data_processing import load_and_preprocess_classification_data, load_and_preprocess_regression_data
 from datasets import *
 from nn_converter import array_to_nn, BEG_PARAMS
 
@@ -34,7 +35,7 @@ warnings.filterwarnings("ignore")
 test_size = 0.3
 min_delta = 0.001  # Minimum change in fitness to qualify as an improvement
 patience_ga = 50  # Number of generations to wait before stopping if there is no improvement
-penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5]  # Penalty multiplier for the complexity of the network
+penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]  # Penalty multiplier for the complexity of the network
 
 fitness_history_best = []
 fitness_history_avg = []
@@ -42,11 +43,12 @@ best_fitness = -np.inf
 patience_counter = 0
 input_size = 0
 output_size = 0
+best_solution_ = [None, None, None]
 
 global X_train, y_train, X_val, y_val, X_test, y_test
 
 def callback_generation(ga_instance):
-    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, ticks_generation
+    global best_fitness, patience_counter, min_delta, patience_ga, fitness_scores, ticks_generation, best_solution_
     
     # Save the fitness score for the best and the average solution in each generation
     best_fitness_current = np.max(ga_instance.last_generation_fitness)
@@ -57,11 +59,12 @@ def callback_generation(ga_instance):
     if best_fitness_current - best_fitness > min_delta:
         patience_counter = 0
         best_fitness = best_fitness_current
+        best_solution = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
     else:
         patience_counter += 1
     
     # Early stopping check
-    if patience_counter >= patience_ga:
+    if best_fitness > 1e11 or patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
         ticks_generation.update(ticks_generation.total - ticks_generation.n)
         return "stop"
@@ -152,7 +155,7 @@ def fitness_func(ga_instance, solution, solution_idx):
         penalty = relative_layers * layer_mult + relative_neurons * neuron_mult
         
         # Calculate the fitness score
-        small_value = 1e-8
+        small_value = 1e-12
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
 
     return fitness_score
@@ -577,46 +580,33 @@ def geneticAlgorithm(ga_index):
 
 if __name__ == '__main__':
     # for dataset in DATASET_LIST:
-    #     # print("Dataset: ", dataset)
     #     problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
-    #     # print("Problem type: ", problem_type)
-    #     # print("Max layers: ", MAX_LAYERS)
-    #     # print("Max layer size: ", MAX_LAYER_SIZE)
-    #     # print("Input layer size: ", INPUT_LAYER_SIZE)
-    #     # print("Output layer size: ", OUTPUT_LAYER_SIZE)
-    #     # print("Activations: ", ACTIVATIONS)
-    #     # print("Output activations: ", ACTIVATIONS_OUTPUT)
-    #     # print("\n")
+    #     load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
     #     dataset_id = DATASET_LIST[dataset]
-    #     X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
-    #     # print("X_train shape: ", X_train.shape)
-    #     # print("y_train shape: ", y_train.shape)
-    #     # print("X_val shape: ", X_val.shape)
-    #     # print("y_val shape: ", y_val.shape)
-    #     # print("X_test shape: ", X_test.shape)
-    #     # print("y_test shape: ", y_test.shape)
-    #     # print("\n")
-        
+    #     # X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
+    #     input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
     #     # print("————————————————————————————————————————————————————————————")
     
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
     
     for dataset_i, dataset in enumerate(DATASET_LIST): 
-        # if dataset_i in [0, 1, 2]:
+        # if dataset_i < 1:
         #     continue
+        
         dataset_id = DATASET_LIST[dataset]
         
         ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)
         
-        # Load the parameters for the selected dataset
+        # Load the parameters for the selected da   taset
         problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
+        load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
         
         # Set up the output directory
         output_dir = f"./logs/{problem_type}/{dataset}/"
         os.makedirs(output_dir, exist_ok=True)
 
         # Load and preprocess the dataset
-        input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset, dataset_id=dataset_id, device=device)
+        input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset, dataset_id=dataset_id, device=device)
         for i, penalty_mult in enumerate(penalty_mult_list):
             start = time.time()
             
@@ -632,11 +622,10 @@ if __name__ == '__main__':
             elapsed_time = time.strftime('%H:%M:%S', time.gmtime(end - start))
             
             # Retrieve the best solution
-            solution, solution_fitness, solution_idx = ga_instance.best_solution()
-            best_solution = solution
+            best_solution, solution_fitness, solution_idx = best_solution_
             
             # Convert the best solution to a neural network using the array_to_nn function
-            nn2 = array_to_nn(best_solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)  # Move the model to the GPU
+            nn2 = array_to_nn(solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)  # Move the model to the GPU
 
             # Create DataLoader for training and validation
             train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=int(nn2.batch_size), shuffle=True)
@@ -652,7 +641,7 @@ if __name__ == '__main__':
             test_loss, test_accuracy = nn2.evaluate(test_loader)
             
             # Save the results to a file
-            nl = int(best_solution[4])
+            nl = int(best_fitness[4])
             act = [ACTIVATIONS[int(a)] for a in best_solution[5+MAX_LAYERS:5+MAX_LAYERS+nl]]
             act_out = ACTIVATIONS_OUTPUT[int(best_solution[-1])]
             results_content = (
