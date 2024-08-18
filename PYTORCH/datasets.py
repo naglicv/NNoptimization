@@ -15,9 +15,9 @@ DATASET_LIST_REG = {
     'auto_mpg': 9,                  # Small, 7 features (mixed)
     'energy_efficiency': 242,       # Small, 8 features
     'concrete_compressive_strength': 165,  # Medium, 8 features
-    'abalone': 1,                   # Medium, 8 features
+    'abalone'   : 1,                   # Medium, 8 features
     'parkinsons_telemonitoring': 189,  # Medium, 26 features (time series data)
-    'air_quality': 360,             # Medium, 15 features (time series data)
+    'solar_flare': 89,              # Medium, 10 features 
     'bike_sharing': 275,            # Medium, 16 features (mixed)
     'infrared_thermography_temperature': 925,  # Large, 7 features (time series data)
 }
@@ -37,8 +37,8 @@ DATASET_LIST_SMALL = {
 DATASET_LIST_LARGE = {
     # Regression Datasets
     'bank_marketing': 222,          # Medium, 16 features (mixed)
+    'solar_flare': 89,              # Medium, 10 features 
     'parkinsons_telemonitoring': 189,  # Medium, 26 features (time series data)
-    'steel_industry_energy_consumption': 851,  # Medium, 15 features (time series data)
     'bike_sharing': 275,            # Medium, 16 features (mixed)
     'adult': 2,                     # Large, 14 features
     'dry_bean': 602,                # Large, 16 features
