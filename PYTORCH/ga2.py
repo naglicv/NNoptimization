@@ -198,7 +198,7 @@ def fitness_func(ga_instance, solution, solution_idx):
         fitness_score = 1 / (validation_loss + penalty_mult * penalty + small_value)
 
         if tuple(solution) not in val_gen_dict:
-            val_gen_dict[tuple(solution)] = (validation_loss,)
+            val_gen_dict[tuple(solution)] = validation_loss
     return fitness_score
 
 
