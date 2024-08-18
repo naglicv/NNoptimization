@@ -1,9 +1,9 @@
-Train accuracy: 98.09523809523809
-Train loss: 0.030491983534635177
+Train accuracy: 99.04761904761905
+Train loss: 0.025312339608977448
 Validation accuracy: 100.0
-Validation loss: 0.007751779899990652
+Validation loss: 0.011224637739232435
 Test accuracy: 100.0
-Test loss: 0.0010453508816681278
+Test loss: 0.0005471930988107943
 Parameters of the best solution:	Learning rate: 0.0028366436986452946
 	Batch size: 16.0
 	Epochs: 38.0
@@ -16,4 +16,4 @@ Parameters of the best solution:	Learning rate: 0.0028366436986452946
 	Output activation: softmax
 Fitness value of the best solution: 958712.1847796902
 Index of the best solution: 40
-Elapsed time: 00:00:16
+Elapsed time: 00:00:17

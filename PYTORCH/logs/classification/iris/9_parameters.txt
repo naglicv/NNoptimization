@@ -10,4 +10,4 @@ Test Size: 0.3
 Min Delta: 0
 Patience for GA: 30
 Penalty Multipliers: [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]
-Current Penalty Multiplier: 2
+Current Penalty Multiplier: 10
