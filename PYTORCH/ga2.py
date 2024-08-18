@@ -731,7 +731,10 @@ if __name__ == '__main__':
             )
             save_results_to_file(f"{output_dir}/{i+1}_results.txt", results_content)
             
-            validation_history_chosen = [validation_history_chosen[i] for i in range(len(validation_history_chosen)) if validation_history_chosen[i] is not None else validation_history_chosen[i-1]]
+            validation_history_chosen = [
+                validation_history_chosen[i] if validation_history_chosen[i] is not None 
+                else validation_history_chosen[i-1] for i in range(len(validation_history_chosen))]
+            
             # Save fitness and validation history per generation
             fitness_history_content = "Generation,Max Fitness,Chosen Individual Loss,Avg Fitness,Avg Loss,Best Loss\n"
             for gen in range(len(fitness_history_best)):
