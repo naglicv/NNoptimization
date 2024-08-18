@@ -16,25 +16,24 @@ from data_processing import load_and_preprocess_classification_data, load_and_pr
 from datasets import *
 from nn_converter import array_to_nn, BEG_PARAMS
 
-DATASET_LIST = DATASET_LIST_CLASS
-# DATASET_LIST = DATASET_LIST_REG
-# DATASET_LIST = DATASET_LIST_SMALL
-# DATASET_LIST = DATASET_LIST_LARGE
-
 # Check if CUDA (GPU support) is available
 if torch.cuda.is_available():
     print("CUDA is available! PyTorch is using the GPU.")
     print(f"Device name: {torch.cuda.get_device_name(0)}")
 else:
     print("CUDA is not available. PyTorch is using the CPU.")
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 warnings.filterwarnings("ignore")
 
+
+DATASET_LIST = DATASET_LIST_CLASS
+# DATASET_LIST = DATASET_LIST_REG
+# DATASET_LIST = DATASET_LIST_SMALL
+# DATASET_LIST = DATASET_LIST_LARGE
+
 test_size = 0.3
-min_delta = 0.001  # Minimum change in fitness to qualify as an improvement
-patience_ga = 50  # Number of generations to wait before stopping if there is no improvement
+min_delta = 0  # Minimum change in fitness to qualify as an improvement
+patience_ga = 30  # Number of generations to wait before stopping if there is no improvement
 penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]  # Penalty multiplier for the complexity of the network
 
 fitness_history_best = []
@@ -59,12 +58,12 @@ def callback_generation(ga_instance):
     if best_fitness_current - best_fitness > min_delta:
         patience_counter = 0
         best_fitness = best_fitness_current
-        best_solution = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
+        best_solution_ = ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)
     else:
         patience_counter += 1
     
     # Early stopping check
-    if best_fitness > 1e11 or patience_counter >= patience_ga:
+    if best_fitness > 1e10 or patience_counter >= patience_ga:
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
         ticks_generation.update(ticks_generation.total - ticks_generation.n)
         return "stop"
@@ -579,13 +578,15 @@ def geneticAlgorithm(ga_index):
     return ga_instance
 
 if __name__ == '__main__':
-    # for dataset in DATASET_LIST:
-    #     problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
-    #     load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
-    #     dataset_id = DATASET_LIST[dataset]
-    #     # X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
-    #     input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
-    #     # print("————————————————————————————————————————————————————————————")
+    for i, dataset in enumerate(DATASET_LIST):
+        if i < 0:
+            continue
+        problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
+        load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
+        dataset_id = DATASET_LIST[dataset]
+        # X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_classification_data(dataset_name=dataset, dataset_id=dataset_id)
+        input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
+        # print("————————————————————————————————————————————————————————————")
     
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
     
@@ -625,7 +626,7 @@ if __name__ == '__main__':
             best_solution, solution_fitness, solution_idx = best_solution_
             
             # Convert the best solution to a neural network using the array_to_nn function
-            nn2 = array_to_nn(solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)  # Move the model to the GPU
+            nn2 = array_to_nn(best_solution, input_size, output_size, problem_type, MAX_LAYERS, ACTIVATIONS, ACTIVATIONS_OUTPUT, device).to(device)  # Move the model to the GPU
 
             # Create DataLoader for training and validation
             train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=int(nn2.batch_size), shuffle=True)
