@@ -6,7 +6,9 @@ Tournament Size: 6
 Number of Parents Kept: 5
 
 Global Variables:
-Test Size: 0.3
+Train Size: 0.7
+Validation Size: 0.15
+Test Size: 0.15
 Min Delta: 0
 Patience for GA: 30
 Penalty Multipliers: [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]

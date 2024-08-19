@@ -1,19 +1,20 @@
 Train accuracy: 100.0
-Train loss: 0.00040164749589166604
-Validation accuracy: 92.5925925925926
-Validation loss: 0.5492445714539826
+Train loss: 0.00013503435957318288
+Validation accuracy: 96.29629629629629
+Validation loss: 0.06204010918736458
 Test accuracy: 100.0
-Test loss: 0.004197429610940162
-Parameters of the best solution:	Learning rate: 0.0028366436986452946
-	Batch size: 16.0
-	Epochs: 38.0
-	Patience: 9.0
+Test loss: 0.0007407147786580026
+Parameters of the best solution:
+	Learning rate: 0.00048109662498959066
+	Batch size: 32.0
+	Epochs: 21.0
+	Patience: 6.0
 	Number of layers: 6
-	Hidden layer sizes: [152. 208. 251. 466. 407. 299.]
-	Activations: ['relu', 'relu', 'tanh', 'relu', 'relu', 'linear']
-	Dropout rates: [0.18786445 0.39082101 0.47191989 0.1197168  0.1913732  0.40804887]
-	Batch normalization: [0. 0. 0. 1. 0. 0.]
+	Hidden layer sizes: [183. 370. 251. 429. 294. 408.]
+	Activations: ['relu', 'relu', 'linear', 'tanh', 'relu', 'relu']
+	Dropout rates: [0.26253289 0.16303258 0.34387767 0.11950367 0.13736804 0.3506625 ]
+	Batch normalization: [1. 1. 1. 0. 1. 0.]
 	Output activation: softmax
-Fitness value of the best solution: 958712.1847796902
-Index of the best solution: 40
-Elapsed time: 00:00:16
+Fitness value of the best solution: 560.3584467714454
+Index of the best solution: 27
+Elapsed time: 00:24:58
