@@ -1,5 +1,6 @@
 import gc
 import os
+import sys
 import time
 import warnings
 
@@ -32,7 +33,7 @@ DATASET_LIST = DATASET_LIST_CLASS
 
 min_delta = 0  # Minimum change in fitness to qualify as an improvement
 patience_ga = 30  # Number of generations to wait before stopping if there is no improvement
-penalty_mult_list = [0, 0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]  # Penalty multiplier for the complexity of the network
+penalty_mult_list = [0, 0.01, 0.1, 1, 10, 100]  # Penalty multiplier for the complexity of the network
 
 fitness_history_best = []
 fitness_history_avg = []
@@ -118,9 +119,11 @@ def callback_generation(ga_instance):
         # print(f"\nEarly stopping: no improvement in fitness for {patience_ga} generations.\n")
         ticks_generation.n = ticks_generation.total
         ticks_generation.last_print_n = ticks_generation.total
+        ticks_generation.refresh()
         return "stop"
     
     ticks_generation.update()
+    ticks_generation.refresh()
     # print(f"\n—————————— GENERATION {ga_instance.generations_completed + 1} ——————————\n")
 
 
@@ -589,8 +592,8 @@ def geneticAlgorithm(ga_index):
 
     sol_per_pop = 50
     num_generations = 300
-    num_parents_mating = 30
-    K_tournaments = 6
+    num_parents_mating = 20
+    K_tournaments = 10
     keep_parents = 5
 
     # sol_per_pop = 100
@@ -601,7 +604,7 @@ def geneticAlgorithm(ga_index):
     
     parent_selection_type = "tournament"
 
-    ticks_generation = tqdm(total=num_generations, desc="Generations", unit="gen", leave=False, colour="cyan")
+    ticks_generation = tqdm(total=num_generations, desc="Generations", unit="gen", leave=False, colour="cyan", file=sys.stdout)
     
     # Print the parameters and global variables to the file
     print_ga_parameters_and_globals(output_dir, ga_index, sol_per_pop, num_generations, num_parents_mating, K_tournaments, keep_parents)
@@ -647,7 +650,7 @@ if __name__ == '__main__':
     #     input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
     #     # print("————————————————————————————————————————————————————————————")
     
-    ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green")
+    ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green", file=sys.stdout)
     
     for dataset_i, dataset in enumerate(DATASET_LIST): 
         # if dataset_i < 1:
@@ -655,9 +658,9 @@ if __name__ == '__main__':
         
         dataset_id = DATASET_LIST[dataset]
         
-        ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False)
+        ticks_penalty = tqdm(total=len(penalty_mult_list), desc="Penalty multipliers", unit="mult", colour="blue", leave=False, file=sys.stdout)
         
-        # Load the parameters for the selected da   taset
+        # Load the parameters for the selected dataset
         problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
         load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
         
@@ -668,8 +671,9 @@ if __name__ == '__main__':
         # Load and preprocess the dataset
         input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset, dataset_id=dataset_id, device=device)
         for i, penalty_mult in enumerate(penalty_mult_list):
-            # if i < 1:
-            #     ticks_penalty.update(1)
+            # if dataset_i == 0 and i < 2:
+            #     ticks_penalty.update()
+            #     ticks_penalty.refresh()
             #     continue
             start = time.time()
             
@@ -773,7 +777,9 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()  # Clear GPU memory cache  
             
             ticks_penalty.update()
+            ticks_penalty.refresh()
         ticks_penalty.close()
         ticks_dataset.update()
+        ticks_dataset.refresh()
         clear_variables(after_event='dataset')
     ticks_dataset.close()
