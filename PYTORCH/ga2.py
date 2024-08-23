@@ -26,8 +26,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 warnings.filterwarnings("ignore")
 
 
-DATASET_LIST = DATASET_LIST_CLASS
-# DATASET_LIST = DATASET_LIST_REG
+# DATASET_LIST = DATASET_LIST_CLASS
+DATASET_LIST = DATASET_LIST_REG
 # DATASET_LIST = DATASET_LIST_SMALL
 # DATASET_LIST = DATASET_LIST_LARGE
 
@@ -638,8 +638,8 @@ def geneticAlgorithm(ga_index):
 
 if __name__ == '__main__':
     # for i, dataset in enumerate(DATASET_LIST):
-    #     if i < 7:
-    #         continue
+    #     # if i < 7:
+    #     #     continue
     #     print(f"—————————————————————————————————")
     #     print(f"Dataset: {dataset}")
     #     print(f"—————————————————————————————————")
@@ -650,11 +650,15 @@ if __name__ == '__main__':
     #     input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset_name=dataset, dataset_id=dataset_id, device=device)
     #     # print("————————————————————————————————————————————————————————————")
     
+    # pass
+
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green", file=sys.stdout)
     
     for dataset_i, dataset in enumerate(DATASET_LIST): 
-        # if dataset_i < 1:
-        #     continue
+        if dataset_i < 4:
+            ticks_dataset.update()
+            ticks_dataset.refresh()
+            continue
         
         dataset_id = DATASET_LIST[dataset]
         
@@ -663,18 +667,19 @@ if __name__ == '__main__':
         # Load the parameters for the selected dataset
         problem_type, MAX_LAYERS, MAX_LAYER_SIZE, ACTIVATIONS, ACTIVATIONS_OUTPUT = load_and_define_parameters(dataset=dataset)
         load_and_preprocess_data = load_and_preprocess_classification_data if problem_type == "classification" else load_and_preprocess_regression_data
-        
         # Set up the output directory
         output_dir = f"./logs/{problem_type}/{dataset}/"
         os.makedirs(output_dir, exist_ok=True)
 
         # Load and preprocess the dataset
         input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test = load_and_preprocess_data(dataset, dataset_id=dataset_id, device=device)
+        MAX_LAYER_SIZE = 5*input_size
+        
         for i, penalty_mult in enumerate(penalty_mult_list):
             # if dataset_i == 0 and i < 2:
             #     ticks_penalty.update()
             #     ticks_penalty.refresh()
-            #     continue
+            #     continue  
             start = time.time()
             
             # Run the genetic algorithm for this penalty multiplier

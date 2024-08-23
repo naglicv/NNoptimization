@@ -71,6 +71,9 @@ class NeuralNetwork(nn.Module):
             running_loss = 0.0
             for batch_data, batch_labels in train_loader:
                 batch_data, batch_labels = batch_data.to(self.device), batch_labels.to(self.device)
+                if batch_data.size(0) == 1:
+                    continue
+
                 self.optimizer.zero_grad()  # Clear the gradients
                 outputs = self(batch_data)
                 
@@ -78,7 +81,7 @@ class NeuralNetwork(nn.Module):
                 if self.problem_type == "classification":
                     batch_labels = batch_labels.long()
                 elif self.problem_type == "regression":
-                    batch_labels = batch_labels.view_as(outputs)
+                    batch_labels = batch_labels.view(outputs.size())
                 
                 # Compute the loss and backpropagate
                 loss = self.criterion(outputs, batch_labels)

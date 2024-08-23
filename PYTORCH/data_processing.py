@@ -296,6 +296,52 @@ def load_and_preprocess_regression_data(dataset_name, dataset_id, device):
         
         # Convert the target DataFrame to a NumPy array and then to a PyTorch tensor
         y = y.to_numpy()
+        
+    elif dataset_id == 880:  # SUPPORT2 dataset
+        # Handling missing values using fill-in values or imputation methods
+        fill_values = {
+            'alb': 3.5,
+            'pafi': 333.3,
+            'bili': 1.01,
+            'crea': 1.01,
+            'bun': 6.51,
+            'wblc': 9.0,
+            'urine': 2502
+        }
+        # Fill missing values with predefined values
+        X.fillna(value=fill_values, inplace=True)
+        
+        # Select only the numerical target columns 'death' and 'hospdead'
+        y = y[['death', 'hospdead']]
+        
+        # Identify categorical and numerical features
+        cat_features = X.select_dtypes(include=['object', 'category']).columns
+        num_features = X.select_dtypes(include=['int64', 'float64']).columns
+        
+        # Define preprocessing pipelines
+        num_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='median')),  # Impute missing values in numeric columns
+            ('scaler', StandardScaler())  # Standardize numerical features
+        ])
+        
+        cat_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='most_frequent')),  # Impute missing values in categorical columns
+            ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))  # One-hot encode categorical features
+        ])
+        
+        # Combine transformers into a ColumnTransformer
+        preprocessor = ColumnTransformer(transformers=[
+            ('num', num_transformer, num_features),
+            ('cat', cat_transformer, cat_features)
+        ])
+        
+        # Apply preprocessing
+        X_preprocessed = preprocessor.fit_transform(X)
+        X_scaled = X_preprocessed
+        
+        # Convert the selected target DataFrame to a NumPy array
+        y = y.to_numpy()
+
 
     else:
         raise ValueError("Dataset ID not recognized. Please update the function to handle this dataset.")
@@ -317,6 +363,11 @@ def load_and_preprocess_regression_data(dataset_name, dataset_id, device):
     
     # Determine input size
     input_size = X_train.shape[1]
-    output_size = 1
+    
+    # Determine output size based on the number of target columns
+    if y_tensor.ndim == 1:
+        output_size = 1  # Single target column
+    else:
+        output_size = y_tensor.shape[1]  # Multiple target columns
 
     return input_size, output_size, X_train, y_train, X_val, y_val, X_test, y_test
