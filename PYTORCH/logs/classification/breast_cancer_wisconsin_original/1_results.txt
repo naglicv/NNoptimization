@@ -1,19 +1,21 @@
-Train accuracy: 99.59100204498978
-Train loss: 0.02048806387826898
+Train accuracy: 97.54601226993866
+Train loss: 0.04968364303931594
 Validation accuracy: 96.19047619047619
-Validation loss: 0.10672055983117648
-Test accuracy: 97.14285714285714
-Test loss: 0.072145346452349
-Parameters of the best solution:	Learning rate: 0.0028366436986452946
-	Batch size: 16.0
-	Epochs: 38.0
-	Patience: 9.0
-	Number of layers: 6
-	Hidden layer sizes: [152. 208. 251. 466. 407. 299.]
-	Activations: ['relu', 'relu', 'tanh', 'relu', 'relu', 'linear']
-	Dropout rates: [0.18786445 0.39082101 0.47191989 0.1197168  0.1913732  0.40804887]
-	Batch normalization: [0. 0. 0. 1. 0. 0.]
+Validation loss: 0.05856530671007931
+Test accuracy: 98.09523809523809
+Test loss: 0.07768664136528969
+Parameters of the best solution:
+	Learning rate: 0.0014061810991168164
+	Batch size: 32.0
+	Epochs: 5.0
+	Patience: 2.0
+	Number of layers: 7
+	Hidden layer sizes: [130. 393. 437. 102. 126. 316. 337.]
+	Activations: ['linear', 'linear', 'relu', 'linear', 'relu', 'relu', 'relu']
+	Dropout rates: [0.44068137 0.46025091 0.20860663 0.30326551 0.45656735 0.23689058
+ 0.2934269 ]
+	Batch normalization: [0. 1. 1. 1. 0. 0. 1.]
 	Output activation: softmax
-Fitness value of the best solution: 958712.1847796902
-Index of the best solution: 40
-Elapsed time: 00:00:47
+Fitness value of the best solution: 26.693570360154553
+Index of the best solution: 49
+Elapsed time: 00:18:25
