@@ -1,0 +1,20 @@
+Train accuracy: None
+Train loss: 7.237861937946743
+Validation accuracy: None
+Validation loss: 7.922849655151367
+Test accuracy: None
+Test loss: 9.89190936088562
+Parameters of the best solution:
+	Learning rate: 0.001820468666504638
+	Batch size: 16.0
+	Epochs: 20.0
+	Patience: 7.0
+	Number of layers: 3
+	Hidden layer sizes: [290. 411. 335.]
+	Activations: ['relu', 'linear', 'relu']
+	Dropout rates: [0.05618339 0.49482149 0.36038908]
+	Batch normalization: [0. 1. 0.]
+	Output activation: relu
+Fitness value of the best solution: 0.15838452634760733
+Index of the best solution: 30
+Elapsed time: 02:24:36
