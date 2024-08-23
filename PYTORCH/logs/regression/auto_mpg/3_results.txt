@@ -1,0 +1,21 @@
+Train accuracy: None
+Train loss: 5.71962038675944
+Validation accuracy: None
+Validation loss: 6.3797032833099365
+Test accuracy: None
+Test loss: 7.098855495452881
+Parameters of the best solution:
+	Learning rate: 0.0010103477479992311
+	Batch size: 32.0
+	Epochs: 38.0
+	Patience: 9.0
+	Number of layers: 12
+	Hidden layer sizes: [435.  90. 105. 225. 398.  52. 403. 261. 502. 272. 319. 247.]
+	Activations: ['linear', 'sigmoid', 'linear', 'tanh', 'sigmoid', 'tanh', 'linear', 'sigmoid', 'linear', 'relu', 'relu', 'relu']
+	Dropout rates: [0.27712053 0.06283704 0.49773213 0.30718598 0.45508167 0.31386438
+ 0.19057751 0.43489599 0.49307203 0.28494471 0.25887474 0.3447822 ]
+	Batch normalization: [0. 1. 0. 0. 0. 0. 0. 0. 0. 1. 1. 1.]
+	Output activation: relu
+Fitness value of the best solution: 0.264234521300121
+Index of the best solution: 30
+Elapsed time: 01:27:14
