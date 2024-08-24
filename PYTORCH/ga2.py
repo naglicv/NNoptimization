@@ -655,10 +655,10 @@ if __name__ == '__main__':
     ticks_dataset = tqdm(total=len(DATASET_LIST), desc="Datasets", unit="dataset", colour="green", file=sys.stdout)
     
     for dataset_i, dataset in enumerate(DATASET_LIST): 
-        if dataset_i < 4:
-            ticks_dataset.update()
-            ticks_dataset.refresh()
-            continue
+        #if dataset_i < 1:
+        #    ticks_dataset.update()
+        #    ticks_dataset.refresh()
+        #    continue
         
         dataset_id = DATASET_LIST[dataset]
         

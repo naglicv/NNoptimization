@@ -1,22 +1,21 @@
 Train accuracy: None
-Train loss: 6.009913539886474
+Train loss: 63.78773668077257
 Validation accuracy: None
-Validation loss: 4.602846145629883
+Validation loss: 49.86515522003174
 Test accuracy: None
-Test loss: 5.72691011428833
+Test loss: 66.18480205535889
 Parameters of the best solution:
-	Learning rate: 0.0015381330690638594
-	Batch size: 64.0
-	Epochs: 26.0
-	Patience: 9.0
-	Number of layers: 13
-	Hidden layer sizes: [312. 116.  94. 204.  83. 148.  94. 188. 278. 242. 326. 461. 500.]
-	Activations: ['linear', 'tanh', 'sigmoid', 'linear', 'tanh', 'linear', 'sigmoid', 'tanh', 'relu', 'linear', 'linear', 'relu', 'linear']
-	Dropout rates: [0.01374296 0.13508706 0.19608778 0.45027435 0.36476552 0.27041447
- 0.19608778 0.44144699 0.31330642 0.21583608 0.32493454 0.19035256
- 0.40159369]
-	Batch normalization: [0. 1. 0. 0. 0. 1. 0. 1. 0. 0. 1. 1. 0.]
-	Output activation: sigmoid
-Fitness value of the best solution: 0.26487818854631306
-Index of the best solution: 33
-Elapsed time: 00:50:38
+	Learning rate: 0.0003805704924107389
+	Batch size: 16.0
+	Epochs: 45.0
+	Patience: 5.0
+	Number of layers: 10
+	Hidden layer sizes: [29. 16.  3. 14. 29. 34. 18. 21. 28. 29.]
+	Activations: ['tanh', 'tanh', 'tanh', 'sigmoid', 'linear', 'linear', 'sigmoid', 'tanh', 'tanh', 'linear']
+	Dropout rates: [0.08492098 0.13901564 0.37700701 0.16923793 0.2507973  0.10163178
+ 0.3409813  0.22444485 0.15492001 0.03521454]
+	Batch normalization: [1. 0. 1. 0. 1. 0. 1. 1. 1. 1.]
+	Output activation: tanh
+Fitness value of the best solution: 0.2933285768219711
+Index of the best solution: 16
+Elapsed time: 01:38:38
